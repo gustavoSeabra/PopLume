@@ -8,5 +8,6 @@ public interface IMarketplaceRepository : IRepository<Marketplace>
     Task<IEnumerable<Marketplace>> ObterMarketplacesPorNomeAsync(string nome, CancellationToken cancellationToken = default);
     Task<IEnumerable<Marketplace>> ObterMarketplacesDesativadosAsync(CancellationToken cancellationToken = default);
     Task<Marketplace?> ObterMarketplacePorIdAsync(Guid idMarketplace, CancellationToken cancellationToken = default);
+    Task<Marketplace?> ObterMarketplacePorIdParaAtualizacaoAsync(Guid idMarketplace, CancellationToken cancellationToken = default);
     Task<Marketplace?> ObterMarketplaceDesativadoPorIdAsync(Guid idMarketplace, CancellationToken cancellationToken = default);
 }

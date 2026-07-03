@@ -19,6 +19,7 @@ public class TaxasMarketplaceEntityConfiguration : IEntityTypeConfiguration<Taxa
         builder.HasOne(e => e.Marketplace)
             .WithMany(e => e.TaxasMarketplace)
             .HasForeignKey(e => e.IdMarketplace)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
     }
 }

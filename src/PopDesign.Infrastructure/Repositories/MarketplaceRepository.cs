@@ -23,6 +23,11 @@ public class MarketplaceRepository : BaseRepository<Marketplace>, IMarketplaceRe
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.IdMarketplace == idMarketplace, cancellationToken);
 
+    public async Task<Marketplace?> ObterMarketplacePorIdParaAtualizacaoAsync(Guid idMarketplace, CancellationToken cancellationToken = default) =>
+        await dbContext.Set<Marketplace>()
+            .Include(m => m.TaxasMarketplace)
+            .FirstOrDefaultAsync(m => m.IdMarketplace == idMarketplace, cancellationToken);
+
     public async Task<Marketplace?> ObterMarketplaceDesativadoPorIdAsync(Guid idMarketplace, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Marketplace>()
             .IgnoreQueryFilters()
