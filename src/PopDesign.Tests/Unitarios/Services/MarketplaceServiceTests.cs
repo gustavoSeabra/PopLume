@@ -186,15 +186,10 @@ public class MarketplaceServiceTests
         var marketplaceExistente = MarketplaceDtoMock.MarketplaceValido(quantidadeTaxas: 2);
         var quantidadeTaxasAntesAtualizacao = marketplaceExistente.TaxasMarketplace.Count;
         var dto = MarketplaceDtoMock.UpdateMarketplaceDtoValido(marketplaceExistente.IdMarketplace, taxas: null);
-        Marketplace? marketplaceAtualizado = null;
 
         _marketplaceRepositoryMock
             .Setup(repository => repository.ObterMarketplacePorIdParaAtualizacaoAsync(dto.IdMarketplace, It.IsAny<CancellationToken>()))
             .ReturnsAsync(marketplaceExistente);
-
-        _marketplaceRepositoryMock
-            .Setup(repository => repository.Atualizar(It.IsAny<Marketplace>()))
-            .Callback<Marketplace>(marketplace => marketplaceAtualizado = marketplace);
 
         _unitOfWorkMock
             .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -207,11 +202,11 @@ public class MarketplaceServiceTests
 
         // Assert
         resultado.Ok.Should().BeTrue();
-        marketplaceAtualizado.Should().NotBeNull();
-        marketplaceAtualizado!.Nome.Should().Be(dto.Nome);
-        marketplaceAtualizado.LinkLoja.Should().Be(dto.LinkLoja);
-        marketplaceAtualizado.TaxasMarketplace.Should().HaveCount(quantidadeTaxasAntesAtualizacao);
+        marketplaceExistente.Nome.Should().Be(dto.Nome);
+        marketplaceExistente.LinkLoja.Should().Be(dto.LinkLoja);
+        marketplaceExistente.TaxasMarketplace.Should().HaveCount(quantidadeTaxasAntesAtualizacao);
 
+        _marketplaceRepositoryMock.Verify(repository => repository.Atualizar(It.IsAny<Marketplace>()), Times.Never);
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -230,15 +225,9 @@ public class MarketplaceServiceTests
             marketplaceExistente.IdMarketplace,
             new List<UpdateMarketplaceTaxaDto> { dtoTaxaAtualizada, novaTaxa });
 
-        Marketplace? marketplaceAtualizado = null;
-
         _marketplaceRepositoryMock
             .Setup(repository => repository.ObterMarketplacePorIdParaAtualizacaoAsync(dto.IdMarketplace, It.IsAny<CancellationToken>()))
             .ReturnsAsync(marketplaceExistente);
-
-        _marketplaceRepositoryMock
-            .Setup(repository => repository.Atualizar(It.IsAny<Marketplace>()))
-            .Callback<Marketplace>(marketplace => marketplaceAtualizado = marketplace);
 
         _unitOfWorkMock
             .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -251,23 +240,23 @@ public class MarketplaceServiceTests
 
         // Assert
         resultado.Ok.Should().BeTrue();
-        marketplaceAtualizado.Should().NotBeNull();
-        marketplaceAtualizado!.TaxasMarketplace.Should().HaveCount(2);
-        marketplaceAtualizado.TaxasMarketplace.Should().NotContain(taxa => taxa.IdTaxa == taxaRemovida.IdTaxa);
+        marketplaceExistente.TaxasMarketplace.Should().HaveCount(2);
+        marketplaceExistente.TaxasMarketplace.Should().NotContain(taxa => taxa.IdTaxa == taxaRemovida.IdTaxa);
 
-        var taxaAtualizadaResultado = marketplaceAtualizado.TaxasMarketplace.Single(taxa => taxa.IdTaxa == taxaAtualizada.IdTaxa);
+        var taxaAtualizadaResultado = marketplaceExistente.TaxasMarketplace.Single(taxa => taxa.IdTaxa == taxaAtualizada.IdTaxa);
         taxaAtualizadaResultado.ValorInicial.Should().Be(dtoTaxaAtualizada.ValorInicial!.Value);
         taxaAtualizadaResultado.ValorFinal.Should().Be(dtoTaxaAtualizada.ValorFinal!.Value);
         taxaAtualizadaResultado.Comissao.Should().Be(dtoTaxaAtualizada.Comissao!.Value);
         taxaAtualizadaResultado.TaxaFixa.Should().Be(dtoTaxaAtualizada.TaxaFixa!.Value);
 
-        marketplaceAtualizado.TaxasMarketplace.Should().Contain(taxa =>
+        marketplaceExistente.TaxasMarketplace.Should().Contain(taxa =>
             taxa.IdTaxa == Guid.Empty &&
             taxa.ValorInicial == novaTaxa.ValorInicial!.Value &&
             taxa.ValorFinal == novaTaxa.ValorFinal!.Value &&
             taxa.Comissao == novaTaxa.Comissao!.Value &&
             taxa.TaxaFixa == novaTaxa.TaxaFixa!.Value);
 
+        _marketplaceRepositoryMock.Verify(repository => repository.Atualizar(It.IsAny<Marketplace>()), Times.Never);
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -277,15 +266,10 @@ public class MarketplaceServiceTests
         // Arrange
         var marketplaceExistente = MarketplaceDtoMock.MarketplaceValido(quantidadeTaxas: 2);
         var dto = MarketplaceDtoMock.UpdateMarketplaceDtoValido(marketplaceExistente.IdMarketplace, new List<UpdateMarketplaceTaxaDto>());
-        Marketplace? marketplaceAtualizado = null;
 
         _marketplaceRepositoryMock
             .Setup(repository => repository.ObterMarketplacePorIdParaAtualizacaoAsync(dto.IdMarketplace, It.IsAny<CancellationToken>()))
             .ReturnsAsync(marketplaceExistente);
-
-        _marketplaceRepositoryMock
-            .Setup(repository => repository.Atualizar(It.IsAny<Marketplace>()))
-            .Callback<Marketplace>(marketplace => marketplaceAtualizado = marketplace);
 
         _unitOfWorkMock
             .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -298,9 +282,9 @@ public class MarketplaceServiceTests
 
         // Assert
         resultado.Ok.Should().BeTrue();
-        marketplaceAtualizado.Should().NotBeNull();
-        marketplaceAtualizado!.TaxasMarketplace.Should().BeEmpty();
+        marketplaceExistente.TaxasMarketplace.Should().BeEmpty();
 
+        _marketplaceRepositoryMock.Verify(repository => repository.Atualizar(It.IsAny<Marketplace>()), Times.Never);
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 

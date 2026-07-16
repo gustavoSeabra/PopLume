@@ -25,6 +25,7 @@ public class MarketplaceRepository : BaseRepository<Marketplace>, IMarketplaceRe
 
     public async Task<Marketplace?> ObterMarketplacePorIdParaAtualizacaoAsync(Guid idMarketplace, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Marketplace>()
+            .AsTracking()
             .Include(m => m.TaxasMarketplace)
             .FirstOrDefaultAsync(m => m.IdMarketplace == idMarketplace, cancellationToken);
 

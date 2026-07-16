@@ -131,7 +131,6 @@ public class MarketplaceService(
             if (resultadoSincronizacaoTaxas != null)
                 return resultadoSincronizacaoTaxas;
 
-            marketplaceRepository.Atualizar(marketplaceExistente);
             await marketplaceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("Marketplace {MarketplaceId} atualizado com sucesso.", dto.IdMarketplace);
