@@ -31,7 +31,7 @@ public static class EquipamentoMapper
         {
             Nome = dto.Nome,
             Apelido = dto.Apelido,
-            DataCompra = dto.DataCompra ?? DateTime.UtcNow,
+            DataCompra = dto.DataCompra!.Value,
             Potencia = dto.Potencia ?? 0,
             ValorCompra = dto.ValorCompra ?? 0m,
             ExpectativaVida = dto.ExpectativaVida ?? 0

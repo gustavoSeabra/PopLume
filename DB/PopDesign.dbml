@@ -2,7 +2,7 @@ Table Equipamento {
   IdEquipamento uuid [pk, not null]
   Nome varchar(100) [not null]
   Apelido varchar(50) [null]
-  DataCompra datetime [not null]
+  DataCompra date [not null]
   Potencia int [not null]
   ValorCompra decimal(10,2) [not null]
   ExpectativaVida int [not null]
@@ -34,6 +34,8 @@ table Marketplace
   IdMarketplace uuid [primary key]
   Nome varchar(100) [not null]
   LinkLoja varchar(100)
+  Excluido boolean [not null, default: false]
+  DataExclusao datetime [null]
 }
 
 table TaxasMarketplace
@@ -42,7 +44,7 @@ table TaxasMarketplace
   IdMarketplace uuid [not null]
   ValorInicial NUMERIC(10, 2) [not null]
   ValorFinal NUMERIC(10, 2) [not null]
-  Comissao int [not null]
+  Comissao NUMERIC(5, 2) [not null]
   TaxaFixa NUMERIC(10, 2)
 }
 

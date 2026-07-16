@@ -35,7 +35,7 @@ Accept: application/json
 {
   "nome": "Impressora 3D",
   "apelido": "IMP-03",
-  "dataCompra": "2026-01-15T00:00:00",
+  "dataCompra": "2026-01-15",
   "potencia": 220,
   "valorCompra": 3500.00,
   "expectativaVida": 36
@@ -50,7 +50,7 @@ Accept: application/json
   "idEquipamento": "{{idEquipamento}}",
   "nome": "Impressora 3D Atualizada",
   "apelido": "IMP-03-AT",
-  "dataCompra": "2026-01-15T00:00:00",
+  "dataCompra": "2026-01-15",
   "potencia": 250,
   "valorCompra": 3800.50,
   "expectativaVida": 48

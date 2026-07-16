@@ -19,7 +19,15 @@ public class PopDesignDbContext: DbContext, IUnitOfWork
         base.OnModelCreating(modelBuilder);
     }
 
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ChangeTracker.DetectChanges();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
     public DbSet<Equipamento> Equipamentos { get; set; }
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<ProdutoComposicao> ProdutoComposicoes { get; set; }
+    public DbSet<Marketplace> Marketplaces { get; set; }
+    public DbSet<TaxasMarketplace> TaxasMarketplace { get; set; }
 }

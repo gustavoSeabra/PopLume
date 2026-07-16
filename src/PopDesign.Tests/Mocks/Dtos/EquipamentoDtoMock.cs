@@ -13,7 +13,7 @@ public static class EquipamentoDtoMock
         {
             Nome = Faker.Commerce.ProductName(),
             Apelido = Faker.Commerce.ProductAdjective(),
-            DataCompra = Faker.Date.Past().ToUniversalTime(),
+            DataCompra = DateOnly.FromDateTime(Faker.Date.Past()),
             Potencia = Faker.Random.Int(100, 1000),
             ValorCompra = Faker.Finance.Amount(500, 10000),
             ExpectativaVida = Faker.Random.Int(12, 120)
@@ -25,7 +25,7 @@ public static class EquipamentoDtoMock
             IdEquipamento = idEquipamento ?? Guid.NewGuid(),
             Nome = Faker.Commerce.ProductName(),
             Apelido = Faker.Commerce.ProductAdjective(),
-            DataCompra = Faker.Date.Past().ToUniversalTime(),
+            DataCompra = DateOnly.FromDateTime(Faker.Date.Past()),
             Potencia = Faker.Random.Int(100, 1000),
             ValorCompra = Faker.Finance.Amount(500, 10000),
             ExpectativaVida = Faker.Random.Int(12, 120)
@@ -37,7 +37,7 @@ public static class EquipamentoDtoMock
             IdEquipamento = idEquipamento ?? Guid.NewGuid(),
             Nome = nome ?? Faker.Commerce.ProductName(),
             Apelido = apelido ?? Faker.Commerce.ProductAdjective(),
-            DataCompra = Faker.Date.Past().ToUniversalTime(),
+            DataCompra = DateOnly.FromDateTime(Faker.Date.Past()),
             Potencia = Faker.Random.Int(100, 1000),
             ValorCompra = Faker.Finance.Amount(500, 10000),
             ExpectativaVida = Faker.Random.Int(12, 120)
