@@ -241,10 +241,10 @@ public class MarketplaceService(
             marketplace.TaxasMarketplace.Add(new TaxasMarketplace
             {
                 IdMarketplace = marketplace.IdMarketplace,
-                ValorInicial = taxaDto.ValorInicial ?? 0m,
-                ValorFinal = taxaDto.ValorFinal ?? 0m,
+                ValorInicial = taxaDto.ValorInicial!.Value,
+                ValorFinal = taxaDto.ValorFinal!.Value,
                 Comissao = taxaDto.Comissao ?? 0m,
-                TaxaFixa = taxaDto.TaxaFixa ?? 0m
+                TaxaFixa = taxaDto.TaxaFixa!.Value
             });
         }
 
