@@ -10,4 +10,21 @@ public class TaxasMarketplace
     public decimal TaxaFixa { get; set; }
 
     public virtual Marketplace Marketplace { get; set; } = null!;
+
+    public bool TentarAtualizarValores(
+        decimal valorInicial,
+        decimal valorFinal,
+        decimal comissao,
+        decimal taxaFixa)
+    {
+        if (valorFinal < valorInicial)
+            return false;
+
+        ValorInicial = valorInicial;
+        ValorFinal = valorFinal;
+        Comissao = comissao;
+        TaxaFixa = taxaFixa;
+
+        return true;
+    }
 }

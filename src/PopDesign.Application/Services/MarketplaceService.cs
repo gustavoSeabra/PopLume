@@ -231,7 +231,10 @@ public class MarketplaceService(
         {
             if (taxaDto.IdTaxa.HasValue && taxaDto.IdTaxa.Value != Guid.Empty)
             {
-                AtualizarTaxa(taxasExistentes[taxaDto.IdTaxa.Value], taxaDto);
+                var resultadoAtualizacaoTaxa = AtualizarTaxa(taxasExistentes[taxaDto.IdTaxa.Value], taxaDto);
+                if (resultadoAtualizacaoTaxa != null)
+                    return resultadoAtualizacaoTaxa;
+
                 continue;
             }
 
@@ -248,15 +251,15 @@ public class MarketplaceService(
         return null;
     }
 
-    private static void AtualizarTaxa(TaxasMarketplace taxaExistente, UpdateMarketplaceTaxaDto taxaDto)
+    private static ResultadoDto<bool>? AtualizarTaxa(TaxasMarketplace taxaExistente, UpdateMarketplaceTaxaDto taxaDto)
     {
-        if (taxaDto.ValorInicial.HasValue)
-            taxaExistente.ValorInicial = taxaDto.ValorInicial.Value;
-        if (taxaDto.ValorFinal.HasValue)
-            taxaExistente.ValorFinal = taxaDto.ValorFinal.Value;
-        if (taxaDto.Comissao.HasValue)
-            taxaExistente.Comissao = taxaDto.Comissao.Value;
-        if (taxaDto.TaxaFixa.HasValue)
-            taxaExistente.TaxaFixa = taxaDto.TaxaFixa.Value;
+        var valorInicial = taxaDto.ValorInicial ?? taxaExistente.ValorInicial;
+        var valorFinal = taxaDto.ValorFinal ?? taxaExistente.ValorFinal;
+        var comissao = taxaDto.Comissao ?? taxaExistente.Comissao;
+        var taxaFixa = taxaDto.TaxaFixa ?? taxaExistente.TaxaFixa;
+
+        return taxaExistente.TentarAtualizarValores(valorInicial, valorFinal, comissao, taxaFixa)
+            ? null
+            : ResultadoDto<bool>.RetornaErro("O valor final deve ser maior ou igual ao valor inicial.");
     }
 }

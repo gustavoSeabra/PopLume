@@ -260,6 +260,44 @@ public class MarketplaceServiceTests
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    [Fact(DisplayName = "Deve rejeitar atualização parcial que deixe o intervalo da taxa inválido.")]
+    public async Task AtualizarAsync_DeveRetornarErro_QuandoAtualizacaoParcialDeixarIntervaloInvalido()
+    {
+        // Arrange
+        var marketplaceExistente = MarketplaceDtoMock.MarketplaceValido(quantidadeTaxas: 1);
+        var taxaExistente = marketplaceExistente.TaxasMarketplace.Single();
+        taxaExistente.ValorInicial = 0m;
+        taxaExistente.ValorFinal = 100m;
+
+        var dto = MarketplaceDtoMock.UpdateMarketplaceDtoValido(
+            marketplaceExistente.IdMarketplace,
+            new List<UpdateMarketplaceTaxaDto>
+            {
+                new()
+                {
+                    IdTaxa = taxaExistente.IdTaxa,
+                    ValorInicial = 200m
+                }
+            });
+
+        _marketplaceRepositoryMock
+            .Setup(repository => repository.ObterMarketplacePorIdParaAtualizacaoAsync(dto.IdMarketplace, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(marketplaceExistente);
+
+        var service = CriarService();
+
+        // Act
+        var resultado = await service.AtualizarAsync(dto);
+
+        // Assert
+        resultado.Ok.Should().BeFalse();
+        taxaExistente.ValorInicial.Should().Be(0m);
+        taxaExistente.ValorFinal.Should().Be(100m);
+
+        _marketplaceRepositoryMock.Verify(repository => repository.Atualizar(It.IsAny<Marketplace>()), Times.Never);
+        _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     [Fact(DisplayName = "Deve remover todas as taxas ao editar marketplace com lista de taxas vazia.")]
     public async Task AtualizarAsync_DeveRemoverTodasAsTaxas_QuandoListaForVazia()
     {
