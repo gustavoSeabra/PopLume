@@ -54,7 +54,7 @@ public class CreateMarketplaceTaxaValidator : AbstractValidator<CreateMarketplac
             .WithMessage("O valor final deve ser maior ou igual ao valor inicial.");
 
         RuleFor(x => x.Comissao)
-            .InclusiveBetween(0, 100).WithMessage("A comissão deve estar entre 0 e 100.");
+            .InclusiveBetween(0m, 100m).WithMessage("A comissão deve estar entre 0 e 100.");
 
         RuleFor(x => x.TaxaFixa)
             .GreaterThanOrEqualTo(0).WithMessage("A taxa fixa não pode ser negativa.");
@@ -81,7 +81,7 @@ public class UpdateMarketplaceTaxaValidator : AbstractValidator<UpdateMarketplac
             .WithMessage("O valor final deve ser maior ou igual ao valor inicial.");
 
         RuleFor(x => x.Comissao)
-            .InclusiveBetween(0, 100).WithMessage("A comissão deve estar entre 0 e 100.");
+            .InclusiveBetween(0m, 100m).WithMessage("A comissão deve estar entre 0 e 100.");
 
         RuleFor(x => x.TaxaFixa)
             .GreaterThanOrEqualTo(0).WithMessage("A taxa fixa não pode ser negativa.");

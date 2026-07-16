@@ -29,7 +29,7 @@ public static class TaxasMarketplaceMapper
         {
             ValorInicial = dto.ValorInicial ?? 0m,
             ValorFinal = dto.ValorFinal ?? 0m,
-            Comissao = dto.Comissao ?? 0,
+            Comissao = dto.Comissao ?? 0m,
             TaxaFixa = dto.TaxaFixa ?? 0m
         };
     }

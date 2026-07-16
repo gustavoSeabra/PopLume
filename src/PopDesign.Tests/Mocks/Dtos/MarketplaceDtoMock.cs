@@ -32,7 +32,7 @@ public static class MarketplaceDtoMock
         {
             ValorInicial = Faker.Finance.Amount(0, 100),
             ValorFinal = Faker.Finance.Amount(101, 500),
-            Comissao = Faker.Random.Int(1, 30),
+            Comissao = Faker.Finance.Amount(1, 30, 2),
             TaxaFixa = Faker.Finance.Amount(0, 50)
         };
 
@@ -42,7 +42,7 @@ public static class MarketplaceDtoMock
             IdTaxa = idTaxa,
             ValorInicial = Faker.Finance.Amount(0, 100),
             ValorFinal = Faker.Finance.Amount(101, 500),
-            Comissao = Faker.Random.Int(1, 30),
+            Comissao = Faker.Finance.Amount(1, 30, 2),
             TaxaFixa = Faker.Finance.Amount(0, 50)
         };
 
@@ -69,7 +69,7 @@ public static class MarketplaceDtoMock
             IdMarketplace = idMarketplace,
             ValorInicial = Faker.Finance.Amount(0, 100),
             ValorFinal = Faker.Finance.Amount(101, 500),
-            Comissao = Faker.Random.Int(1, 30),
+            Comissao = Faker.Finance.Amount(1, 30, 2),
             TaxaFixa = Faker.Finance.Amount(0, 50)
         };
 

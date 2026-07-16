@@ -241,7 +241,7 @@ public class MarketplaceService(
                 IdMarketplace = marketplace.IdMarketplace,
                 ValorInicial = taxaDto.ValorInicial ?? 0m,
                 ValorFinal = taxaDto.ValorFinal ?? 0m,
-                Comissao = taxaDto.Comissao ?? 0,
+                Comissao = taxaDto.Comissao ?? 0m,
                 TaxaFixa = taxaDto.TaxaFixa ?? 0m
             });
         }

@@ -13,7 +13,7 @@ public class TaxasMarketplaceEntityConfiguration : IEntityTypeConfiguration<Taxa
 
         builder.Property(e => e.ValorInicial).HasPrecision(10, 2);
         builder.Property(e => e.ValorFinal).HasPrecision(10, 2);
-        builder.Property(e => e.Comissao).IsRequired();
+        builder.Property(e => e.Comissao).HasPrecision(5, 2).IsRequired();
         builder.Property(e => e.TaxaFixa).HasPrecision(10, 2);
 
         builder.HasOne(e => e.Marketplace)

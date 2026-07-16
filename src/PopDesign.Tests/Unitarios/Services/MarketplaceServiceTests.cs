@@ -151,6 +151,7 @@ public class MarketplaceServiceTests
     {
         // Arrange
         var dto = MarketplaceDtoMock.CreateMarketplaceDtoValido(quantidadeTaxas: 2);
+        dto.TaxasMarketplace![0].Comissao = 2.75m;
         Marketplace? marketplaceAdicionado = null;
 
         _marketplaceRepositoryMock
@@ -173,6 +174,7 @@ public class MarketplaceServiceTests
         marketplaceAdicionado.LinkLoja.Should().Be(dto.LinkLoja);
         marketplaceAdicionado.Excluido.Should().BeFalse();
         marketplaceAdicionado.TaxasMarketplace.Should().HaveCount(dto.TaxasMarketplace!.Count);
+        marketplaceAdicionado.TaxasMarketplace.First().Comissao.Should().Be(2.75m);
 
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -221,7 +223,9 @@ public class MarketplaceServiceTests
         var taxaAtualizada = marketplaceExistente.TaxasMarketplace.First();
         var taxaRemovida = marketplaceExistente.TaxasMarketplace.Last();
         var novaTaxa = MarketplaceDtoMock.UpdateMarketplaceTaxaDtoValida();
+        novaTaxa.Comissao = 3.45m;
         var dtoTaxaAtualizada = MarketplaceDtoMock.UpdateMarketplaceTaxaDtoValida(taxaAtualizada.IdTaxa);
+        dtoTaxaAtualizada.Comissao = 2.75m;
         var dto = MarketplaceDtoMock.UpdateMarketplaceDtoValido(
             marketplaceExistente.IdMarketplace,
             new List<UpdateMarketplaceTaxaDto> { dtoTaxaAtualizada, novaTaxa });

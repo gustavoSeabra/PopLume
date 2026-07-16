@@ -29,7 +29,7 @@ public class CreateMarketplaceTaxaDto
 {
     public decimal? ValorInicial { get; set; }
     public decimal? ValorFinal { get; set; }
-    public int? Comissao { get; set; }
+    public decimal? Comissao { get; set; }
     public decimal? TaxaFixa { get; set; }
 }
 
@@ -38,6 +38,6 @@ public class UpdateMarketplaceTaxaDto
     public Guid? IdTaxa { get; set; }
     public decimal? ValorInicial { get; set; }
     public decimal? ValorFinal { get; set; }
-    public int? Comissao { get; set; }
+    public decimal? Comissao { get; set; }
     public decimal? TaxaFixa { get; set; }
 }
