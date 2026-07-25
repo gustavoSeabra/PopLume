@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="PopLume.Api/PopLume.Api.csproj" />
+  <Project Path="PopLume.Application/PopLume.Application.csproj" Id="04ecaceb-f856-4d90-a500-0e72dbc0bad7" />
+  <Project Path="PopLume.Domain/PopLume.Domain.csproj" Id="31f111e9-caf1-4ed3-afec-bb49be0afabe" />
+  <Project Path="PopLume.Infrastructure/PopLume.Infrastructure.csproj" Id="2fb87906-a9f6-41a5-ade1-c92511e90c2b" />
+  <Project Path="PopLume.Tests/PopLume.Tests.csproj" />
+</Solution>

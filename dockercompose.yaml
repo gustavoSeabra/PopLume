@@ -8,19 +8,19 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "Password1"
-      POSTGRES_DB: PopDesign
+      POSTGRES_DB: PopLume
     ports:
       - 5432:5432
   popdesign-api:
     container_name: popdesign-api
     build:
       context: .
-      dockerfile: "./docker/dockerfile-popdesignapi"
+      dockerfile: "./docker/dockerfile-poplumeapi"
     depends_on:
       - db
     environment:
       ASPNETCORE_HTTP_PORTS: 8080
-      ConnectionStrings__PopDesignApi: Host=db;Port=5432;Database=PopDesign;Username=postgres;Password=Password1
+      ConnectionStrings__PopLumeApi: Host=db;Port=5432;Database=PopLume;Username=postgres;Password=Password1
     ports:
       - "8081:8080"
 

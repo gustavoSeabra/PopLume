@@ -1,0 +1,114 @@
+@PopLume_HostAddress = http://localhost:5254
+# IDs gerados automaticamente para os exemplos; substitua pelos retornados pelo POST se necessário.
+@idEquipamento = {{$guid}}
+@idProduto = {{$guid}}
+@idProdutoFilho = {{$guid}}
+@nomeEquipamento = Impressora
+@apelidoEquipamento = IMP-01
+@nomeProduto = Suporte
+
+### Equipamentos
+GET {{PopLume_HostAddress}}/api/Equipamento
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Equipamento/{{idEquipamento}}
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Equipamento/buscar/nome/{{nomeEquipamento}}
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Equipamento/buscar/apelido/{{apelidoEquipamento}}
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Equipamento/desativados
+Accept: application/json
+
+###
+POST {{PopLume_HostAddress}}/api/Equipamento
+Content-Type: application/json
+Accept: application/json
+
+{
+  "nome": "Impressora 3D",
+  "apelido": "IMP-03",
+  "dataCompra": "2026-01-15",
+  "potencia": 220,
+  "valorCompra": 3500.00,
+  "expectativaVida": 36
+}
+
+###
+PUT {{PopLume_HostAddress}}/api/Equipamento
+Content-Type: application/json
+Accept: application/json
+
+{
+  "idEquipamento": "{{idEquipamento}}",
+  "nome": "Impressora 3D Atualizada",
+  "apelido": "IMP-03-AT",
+  "dataCompra": "2026-01-15",
+  "potencia": 250,
+  "valorCompra": 3800.50,
+  "expectativaVida": 48
+}
+
+###
+DELETE {{PopLume_HostAddress}}/api/Equipamento/{{idEquipamento}}
+Accept: application/json
+
+###
+PATCH {{PopLume_HostAddress}}/api/Equipamento/{{idEquipamento}}/restaurar
+Accept: application/json
+
+### Produtos
+GET {{PopLume_HostAddress}}/api/Produto
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Produto/{{idProduto}}
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Produto/buscar/{{nomeProduto}}
+Accept: application/json
+
+###
+POST {{PopLume_HostAddress}}/api/Produto
+Content-Type: application/json
+Accept: application/json
+
+{
+  "nome": "Suporte de Impressão",
+  "precoCusto": 120.50,
+  "quantidadeFilamento": 1.25,
+  "tempoImpressao": 480,
+  "componentes": [
+    {
+      "idProdutoFilho": "{{idProdutoFilho}}",
+      "quantidade": 2
+    }
+  ]
+}
+
+###
+PUT {{PopLume_HostAddress}}/api/Produto
+Content-Type: application/json
+Accept: application/json
+
+{
+  "idProduto": "{{idProduto}}",
+  "nome": "Suporte de Impressão Atualizado",
+  "precoCusto": 135.00,
+  "quantidadeFilamento": 1.40,
+  "tempoImpressao": 540,
+  "componentes": [
+    {
+      "idProdutoFilho": "{{idProdutoFilho}}",
+      "quantidade": 3
+    }
+  ]
+}
