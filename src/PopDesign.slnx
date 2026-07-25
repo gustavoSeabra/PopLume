@@ -1,7 +1,0 @@
-<Solution>
-  <Project Path="PopDesign.Api/PopDesign.Api.csproj" />
-  <Project Path="PopDesign.Application/PopDesign.Application.csproj" Id="04ecaceb-f856-4d90-a500-0e72dbc0bad7" />
-  <Project Path="PopDesign.Domain/PopDesign.Domain.csproj" Id="31f111e9-caf1-4ed3-afec-bb49be0afabe" />
-  <Project Path="PopDesign.Infrastructure/PopDesign.Infrastructure.csproj" Id="2fb87906-a9f6-41a5-ade1-c92511e90c2b" />
-  <Project Path="PopDesign.Tests/PopDesign.Tests.csproj" />
-</Solution>
