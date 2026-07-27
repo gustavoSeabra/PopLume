@@ -2,20 +2,23 @@
    Design Tokens & CSS Variables
    -------------------------------------------------------- */
 :root {
-    --primary: #FF7E79;
-    --primary-hover: #EF6F6A;
-    --primary-light: #FFF0ED;
-    --black: #1E1E1E;
-    --text-main: #2D2D2D;
-    --text-muted: #666666;
-    --bg-page: #FAF7F6;
-    --bg-card: #FFF9F8;
+    --primary: #7FE7C4;
+    --primary-hover: #0F5F63;
+    --primary-light: rgba(127, 231, 196, 0.16);
+    --secondary: #7A4DFF;
+    --secondary-light: #C9B6FF;
+    --petroleum: #0F5F63;
+    --black: #111111;
+    --text-main: #111111;
+    --text-muted: rgba(15, 95, 99, 0.76);
+    --bg-page: rgba(201, 182, 255, 0.08);
+    --bg-card: #FFFFFF;
     --white: #FFFFFF;
     
     /* Shadows */
-    --shadow-subtle: 0 10px 30px rgba(0, 0, 0, 0.02);
-    --shadow-card: 0 16px 40px rgba(255, 126, 121, 0.06);
-    --shadow-hover: 0 20px 48px rgba(255, 126, 121, 0.12);
+    --shadow-subtle: 0 10px 30px rgba(15, 95, 99, 0.07);
+    --shadow-card: 0 16px 40px rgba(122, 77, 255, 0.08);
+    --shadow-hover: 0 20px 48px rgba(122, 77, 255, 0.16);
 
     /* Transitions */
     --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -103,8 +106,11 @@ section.show {
 }
 
 .logo-img {
-    height: 60px;
+    width: 150px;
+    max-width: 50vw;
+    height: auto;
     object-fit: contain;
+    flex-shrink: 0;
     transition: var(--transition-fast);
 }
 
@@ -125,17 +131,17 @@ section.show {
     height: 42px;
     border-radius: 50%;
     background-color: var(--white);
-    color: var(--black);
+    color: var(--petroleum);
     box-shadow: var(--shadow-subtle);
     font-size: 1.1rem;
     transition: var(--transition-smooth);
 }
 
 .social-icon:hover {
-    background-color: var(--primary);
+    background-color: var(--secondary);
     color: var(--white);
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(255, 126, 121, 0.3);
+    box-shadow: 0 8px 20px rgba(122, 77, 255, 0.28);
 }
 
 /* --------------------------------------------------------
@@ -169,14 +175,14 @@ section.show {
 .badge-line {
     width: 24px;
     height: 2px;
-    background-color: var(--primary);
+    background-color: var(--secondary);
     display: inline-block;
 }
 
 .badge-text {
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--petroleum);
     letter-spacing: 1.5px;
 }
 
@@ -189,7 +195,7 @@ section.show {
 }
 
 .hero-title .highlight {
-    color: var(--primary);
+    color: var(--secondary);
 }
 
 .hero-description {
@@ -200,7 +206,7 @@ section.show {
 }
 
 .hero-description .text-accent {
-    color: var(--primary);
+    color: var(--petroleum);
     font-weight: 500;
 }
 
@@ -210,19 +216,19 @@ section.show {
     padding: 14px 28px;
     border: 2px solid var(--primary);
     border-radius: var(--radius-round);
-    color: var(--primary);
+    color: var(--black);
     font-weight: 600;
     font-size: 0.95rem;
     gap: 10px;
     transition: var(--transition-smooth);
-    background-color: transparent;
+    background-color: var(--primary);
 }
 
 .btn-hero:hover {
-    background-color: var(--primary);
+    background-color: var(--primary-hover);
     color: var(--white);
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(255, 126, 121, 0.2);
+    box-shadow: 0 10px 25px rgba(15, 95, 99, 0.24);
 }
 
 .btn-icon-right {
@@ -245,6 +251,8 @@ section.show {
     border-radius: var(--radius-xl);
     overflow: hidden;
     transition: var(--transition-smooth);
+    background-color: rgba(201, 182, 255, 0.28);
+    box-shadow: 0 24px 60px rgba(127, 231, 196, 0.24);
 }
 
 .hero-img {
@@ -266,8 +274,8 @@ section.show {
 }
 
 .marketplaces-card {
-    background-color: var(--bg-card);
-    border: 1px solid rgba(255, 126, 121, 0.08);
+    background: linear-gradient(135deg, rgba(201, 182, 255, 0.32), rgba(127, 231, 196, 0.26));
+    border: 1px solid rgba(122, 77, 255, 0.12);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-subtle);
     display: grid;
@@ -277,7 +285,7 @@ section.show {
 }
 
 .marketplaces-tag {
-    color: var(--primary);
+    color: var(--petroleum);
     display: block;
     font-size: 0.75rem;
     font-weight: 700;
@@ -308,7 +316,7 @@ section.show {
 .marketplace-link {
     align-items: center;
     background-color: var(--white);
-    border: 1px solid rgba(255, 126, 121, 0.08);
+    border: 1px solid rgba(15, 95, 99, 0.10);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-subtle);
     display: flex;
@@ -319,7 +327,7 @@ section.show {
 }
 
 .marketplace-link:hover {
-    border-color: rgba(255, 126, 121, 0.24);
+    border-color: var(--primary);
     box-shadow: var(--shadow-hover);
     transform: translateY(-4px);
 }
@@ -350,25 +358,38 @@ section.show {
     border-radius: var(--radius-lg);
     text-align: center;
     box-shadow: var(--shadow-subtle);
-    border: 1px solid rgba(255, 126, 121, 0.04);
+    border: 1px solid rgba(15, 95, 99, 0.08);
     transition: var(--transition-smooth);
 }
 
 .category-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-hover);
-    border-color: rgba(255, 126, 121, 0.15);
+    border-color: var(--secondary-light);
 }
 
 .card-icon-wrapper {
     margin-bottom: 16px;
     display: flex;
     justify-content: center;
+    align-items: center;
+    width: 112px;
+    height: 112px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 50%;
+    background-color: rgba(201, 182, 255, 0.32);
+}
+
+.category-card:nth-child(even) .card-icon-wrapper {
+    background-color: rgba(127, 231, 196, 0.34);
 }
 
 .category-icon {
     width: 86px;
     height: 86px;
+    object-fit: contain;
+    object-position: center;
     transition: var(--transition-smooth);
 }
 
@@ -397,7 +418,8 @@ section.show {
 }
 
 .construction-card {
-    background-color: var(--bg-card);
+    background: linear-gradient(135deg, rgba(127, 231, 196, 0.34), rgba(201, 182, 255, 0.36));
+    border: 1px solid rgba(15, 95, 99, 0.08);
     border-radius: var(--radius-xl);
     padding: 24px 20px;
     display: grid;
@@ -410,7 +432,7 @@ section.show {
 .construction-tag {
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--petroleum);
     letter-spacing: 2px;
     display: block;
     margin-bottom: 6px;
@@ -427,7 +449,7 @@ section.show {
     display: block;
     width: 45px;
     height: 3px;
-    background-color: var(--primary);
+    background-color: var(--secondary);
     margin-bottom: 16px;
 }
 
@@ -460,7 +482,8 @@ section.show {
 }
 
 .contact-card {
-    background-color: var(--bg-card);
+    background: linear-gradient(135deg, rgba(201, 182, 255, 0.78), rgba(127, 231, 196, 0.58));
+    border: 1px solid rgba(122, 77, 255, 0.10);
     border-radius: var(--radius-xl);
     padding: 30px 20px;
     display: flex;
@@ -496,7 +519,7 @@ section.show {
 .contact-tag {
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--petroleum);
     letter-spacing: 2px;
     display: block;
     margin-bottom: 4px;
@@ -512,7 +535,7 @@ section.show {
 
 .contact-description {
     font-size: 0.95rem;
-    color: var(--text-muted);
+    color: var(--petroleum);
     line-height: 1.6;
 }
 
@@ -538,8 +561,8 @@ section.show {
     padding: 16px 36px;
     border: 2px solid var(--primary);
     border-radius: var(--radius-round);
-    color: var(--primary);
-    background-color: transparent;
+    color: var(--black);
+    background-color: var(--primary);
     font-weight: 600;
     font-size: 1rem;
     gap: 12px;
@@ -549,10 +572,10 @@ section.show {
 }
 
 .btn-whatsapp:hover {
-    background-color: var(--primary);
+    background-color: var(--secondary);
     color: var(--white);
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(255, 126, 121, 0.2);
+    box-shadow: 0 10px 25px rgba(17, 17, 17, 0.22);
 }
 
 .whatsapp-icon {
@@ -576,7 +599,7 @@ section.show {
 .arrow-text {
     font-size: 0.8rem;
     font-weight: 500;
-    color: var(--text-muted);
+    color: var(--petroleum);
     text-align: center;
 }
 
@@ -595,7 +618,7 @@ section.show {
     flex-direction: column;
     gap: 30px;
     box-shadow: var(--shadow-subtle);
-    border: 1px solid rgba(255, 126, 121, 0.04);
+    border: 1px solid rgba(122, 77, 255, 0.10);
 }
 
 .newsletter-info {
@@ -654,14 +677,14 @@ section.show {
 }
 
 .newsletter-input:focus {
-    border-color: var(--primary);
+    border-color: var(--secondary);
     background-color: var(--white);
-    box-shadow: 0 0 0 4px rgba(255, 126, 121, 0.1);
+    box-shadow: 0 0 0 4px rgba(201, 182, 255, 0.36);
 }
 
 .btn-submit {
     padding: 16px 30px;
-    background-color: var(--black);
+    background-color: var(--secondary);
     color: var(--white);
     border: none;
     border-radius: var(--radius-md);
@@ -673,9 +696,9 @@ section.show {
 }
 
 .btn-submit:hover {
-    background-color: var(--primary);
+    background-color: var(--petroleum);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 126, 121, 0.25);
+    box-shadow: 0 8px 20px rgba(15, 95, 99, 0.24);
 }
 
 /* --------------------------------------------------------
@@ -684,7 +707,7 @@ section.show {
 .footer {
     background-color: var(--white);
     padding: 50px 0 30px;
-    border-top: 1px solid rgba(255, 126, 121, 0.06);
+    border-top: 1px solid rgba(15, 95, 99, 0.08);
 }
 
 .footer-container {
@@ -702,8 +725,11 @@ section.show {
 }
 
 .footer-logo {
-    height: 52px;
+    width: 230px;
+    max-width: 100%;
+    height: auto;
     object-fit: contain;
+    flex-shrink: 0;
 }
 
 .footer-nav {
@@ -722,11 +748,11 @@ section.show {
 }
 
 .footer-link:hover {
-    color: var(--primary);
+    color: var(--secondary);
 }
 
 .nav-separator {
-    color: var(--primary);
+    color: var(--secondary);
     opacity: 0.5;
 }
 
@@ -875,11 +901,12 @@ section.show {
     }
 
     .logo-img {
-        height: 72px;
+        width: 210px;
+        max-width: none;
     }
 
     .footer-logo {
-        height: 60px;
+        width: 260px;
     }
 }
 
@@ -1085,10 +1112,10 @@ section.show {
     }
 
     .logo-img {
-        height: 130px;
+        width: 320px;
     }
 
     .footer-logo {
-        height: 68px;
+        width: 280px;
     }
 }

@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 // Success State
                 submitBtn.textContent = "Inscrito! 🎉";
-                submitBtn.style.backgroundColor = "#2ECB71"; // Success Green
+                submitBtn.style.backgroundColor = "#0F5F63"; // Success state from the brand palette
                 emailInput.value = "";
 
                 // Reset form button after a few seconds

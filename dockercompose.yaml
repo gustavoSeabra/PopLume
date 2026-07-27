@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    container_name: postgres-popdesign
+    container_name: postgres-poplume
     image: "postgres"
     restart: always
     environment:
@@ -11,8 +11,8 @@ services:
       POSTGRES_DB: PopLume
     ports:
       - 5432:5432
-  popdesign-api:
-    container_name: popdesign-api
+  poplume-api:
+    container_name: poplume-api
     build:
       context: .
       dockerfile: "./docker/dockerfile-poplumeapi"
