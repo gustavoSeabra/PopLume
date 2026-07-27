@@ -24,13 +24,13 @@ services:
     ports:
       - "8081:8080"
 
-#  popdesign-app:
-#    container_name: popdesign-app
-#    build:
-#      context: .
-#      dockerfile: "./docker/dockerfile-popdesignApp"
-#    depends_on:
-#      - popdesign-api
-#    restart: always
-#    ports:
-#      - "8080:80"
+  poplume-app:
+    container_name: poplume-app
+    build:
+      context: .
+      dockerfile: "./docker/dockerfile-poplumeweb"
+    depends_on:
+      - poplume-api
+    restart: always
+    ports:
+      - "8080:4000"

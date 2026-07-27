@@ -10,10 +10,10 @@ FROM mcr.microsoft.com/dotnet/sdk:$IMAGE_TAG AS build
 WORKDIR /
 
 # Copia os arquivos de projeto primeiro para restaurar as dependências e aproveitar o cache do Docker
-COPY ["src/PopLume.Api/PopLume.Api.csproj", "src/PopLume.Api/"]
-COPY ["src/PopLume.Application/PopLume.Application.csproj", "src/PopLume.Application/"]
-COPY ["src/PopLume.Domain/PopLume.Domain.csproj", "src/PopLume.Domain/"]
-COPY ["src/PopLume.Infrastructure/PopLume.Infrastructure.csproj", "src/PopLume.Infrastructure/"]
+COPY ["src/API/PopLume.Api/PopLume.Api.csproj", "src/PopLume.Api/"]
+COPY ["src/API/PopLume.Application/PopLume.Application.csproj", "src/PopLume.Application/"]
+COPY ["src/API/PopLume.Domain/PopLume.Domain.csproj", "src/PopLume.Domain/"]
+COPY ["src/API/PopLume.Infrastructure/PopLume.Infrastructure.csproj", "src/PopLume.Infrastructure/"]
 
 RUN dotnet restore "src/PopLume.Api/PopLume.Api.csproj"
 

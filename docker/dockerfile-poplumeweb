@@ -1,0 +1,26 @@
+ARG NODE_VERSION=24-alpine
+
+FROM node:${NODE_VERSION} AS build
+WORKDIR /app
+
+# Copia primeiro os manifests para aproveitar o cache da instalação.
+COPY src/App/poplume-web/package.json src/App/poplume-web/package-lock.json ./
+RUN npm ci
+
+# Compila o frontend Angular com SSR.
+COPY src/App/poplume-web/ ./
+RUN npm run build
+
+FROM node:${NODE_VERSION} AS runtime
+ENV NODE_ENV=production
+ENV PORT=4000
+
+WORKDIR /app
+
+# O bundle SSR do Angular contém o servidor Express necessário em produção.
+COPY --from=build --chown=node:node /app/dist/poplume-web ./
+
+USER node
+EXPOSE 4000
+
+CMD ["node", "server/server.mjs"]
