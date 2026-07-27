@@ -15,11 +15,13 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IProdutoService, ProdutoService>();
         services.AddScoped<IEquipamentoService, EquipamentoService>();
         services.AddScoped<IMarketplaceService, MarketplaceService>();
+        services.AddScoped<IFilamentoService, FilamentoService>();
 
         // Repositórios
         services.AddScoped<IEquipamentoRepository, EquipamentoRepository>();
         services.AddScoped<IProdutoRepository, ProdutoRepository>();
         services.AddScoped<IMarketplaceRepository, MarketplaceRepository>();
+        services.AddScoped<IFilamentoRepository, FilamentoRepository>();
 
         return services;
     }

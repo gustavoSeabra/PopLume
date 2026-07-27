@@ -30,4 +30,5 @@ public class PopLumeDbContext: DbContext, IUnitOfWork
     public DbSet<ProdutoComposicao> ProdutoComposicoes { get; set; }
     public DbSet<Marketplace> Marketplaces { get; set; }
     public DbSet<TaxasMarketplace> TaxasMarketplace { get; set; }
+    public DbSet<Filamento> Filamentos { get; set; }
 }

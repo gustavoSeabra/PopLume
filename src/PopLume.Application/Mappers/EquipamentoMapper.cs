@@ -18,6 +18,7 @@ public static class EquipamentoMapper
             Potencia = equipamento.Potencia,
             ValorCompra = equipamento.ValorCompra,
             ExpectativaVida = equipamento.ExpectativaVida,
+            ValorHora = equipamento.ValorHora,
             Excluido = equipamento.Excluido,
             DataExclusao = equipamento.DataExclusao
         };

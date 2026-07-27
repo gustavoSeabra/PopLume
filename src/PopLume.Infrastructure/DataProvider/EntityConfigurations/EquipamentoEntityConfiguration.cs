@@ -18,6 +18,11 @@ public class EquipamentoEntityConfiguration : IEntityTypeConfiguration<Equipamen
         builder.Property(e => e.Potencia).IsRequired();
         builder.Property(e => e.ValorCompra).HasPrecision(10, 2);
         builder.Property(e => e.ExpectativaVida);
+        builder.Property(e => e.ValorHora)
+            .HasPrecision(10, 2)
+            .HasComputedColumnSql(
+                """CASE WHEN "ExpectativaVida" > 0 THEN "ValorCompra" / "ExpectativaVida" ELSE 0 END""",
+                stored: true);
         builder.Property(e => e.Excluido).IsRequired().HasDefaultValue(false);
         builder.Property(e => e.DataExclusao);
     }

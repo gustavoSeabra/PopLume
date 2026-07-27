@@ -3,6 +3,7 @@
 @idEquipamento = {{$guid}}
 @idProduto = {{$guid}}
 @idProdutoFilho = {{$guid}}
+@idFilamento = {{$guid}}
 @nomeEquipamento = Impressora
 @apelidoEquipamento = IMP-01
 @nomeProduto = Suporte
@@ -38,7 +39,7 @@ Accept: application/json
   "dataCompra": "2026-01-15",
   "potencia": 220,
   "valorCompra": 3500.00,
-  "expectativaVida": 36
+  "expectativaVida": 2000
 }
 
 ###
@@ -53,7 +54,7 @@ Accept: application/json
   "dataCompra": "2026-01-15",
   "potencia": 250,
   "valorCompra": 3800.50,
-  "expectativaVida": 48
+  "expectativaVida": 2500
 }
 
 ###
@@ -62,6 +63,53 @@ Accept: application/json
 
 ###
 PATCH {{PopLume_HostAddress}}/api/Equipamento/{{idEquipamento}}/restaurar
+Accept: application/json
+
+### Filamentos
+GET {{PopLume_HostAddress}}/api/Filamento
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Filamento/{{idFilamento}}
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Filamento/buscar/cor/Preto
+Accept: application/json
+
+###
+GET {{PopLume_HostAddress}}/api/Filamento/buscar/tipo/PLA
+Accept: application/json
+
+###
+POST {{PopLume_HostAddress}}/api/Filamento
+Content-Type: application/json
+Accept: application/json
+
+{
+  "cor": "Preto",
+  "valor": 129.90,
+  "peso": 1000,
+  "tipo": "PLA",
+  "dataCompra": "2026-07-27"
+}
+
+###
+PUT {{PopLume_HostAddress}}/api/Filamento
+Content-Type: application/json
+Accept: application/json
+
+{
+  "idFilamento": "{{idFilamento}}",
+  "cor": "Preto Fosco",
+  "valor": 139.90,
+  "peso": 1000,
+  "tipo": "PETG",
+  "dataCompra": "2026-07-27"
+}
+
+###
+DELETE {{PopLume_HostAddress}}/api/Filamento/{{idFilamento}}
 Accept: application/json
 
 ### Produtos
