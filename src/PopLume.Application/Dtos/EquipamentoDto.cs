@@ -9,6 +9,7 @@ public class EquipamentoDto
     public int Potencia { get; set; }
     public decimal ValorCompra { get; set; }
     public int ExpectativaVida { get; set; }
+    public decimal ValorHora { get; set; }
     public bool Excluido { get; set; }
     public DateTime? DataExclusao { get; set; }
 }

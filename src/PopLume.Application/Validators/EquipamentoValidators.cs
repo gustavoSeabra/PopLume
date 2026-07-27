@@ -24,7 +24,7 @@ public class CreateEquipamentoValidator : AbstractValidator<CreateEquipamentoDto
             .GreaterThanOrEqualTo(0).WithMessage("O valor de compra não pode ser negativo.");
 
         RuleFor(x => x.ExpectativaVida)
-            .GreaterThan(0).WithMessage("A expectativa de vida deve ser maior que zero.");
+            .GreaterThan(0).WithMessage("A expectativa de vida em horas deve ser maior que zero.");
     }
 }
 
@@ -49,6 +49,6 @@ public class UpdateEquipamentoValidator : AbstractValidator<UpdateEquipamentoDto
             .GreaterThanOrEqualTo(0).WithMessage("O valor de compra não pode ser negativo.");
 
         RuleFor(x => x.ExpectativaVida)
-            .GreaterThan(0).WithMessage("A expectativa de vida deve ser maior que zero.");
+            .GreaterThan(0).WithMessage("A expectativa de vida em horas deve ser maior que zero.");
     }
 }

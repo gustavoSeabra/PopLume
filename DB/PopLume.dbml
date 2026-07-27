@@ -5,7 +5,8 @@ Table Equipamento {
   DataCompra date [not null]
   Potencia int [not null]
   ValorCompra decimal(10,2) [not null]
-  ExpectativaVida int [not null]
+  ExpectativaVida int [not null, note: 'Expectativa de vida útil em horas']
+  ValorHora decimal(10,2) [not null, note: 'Calculado: ValorCompra / ExpectativaVida']
   Excluido boolean [not null, default: false]
   DataExclusao datetime [null]
 }
@@ -16,6 +17,15 @@ Table Produto {
   PrecoCusto decimal(10,2) [not null]
   QuantidadeFilamento decimal(8,2) [not null]
   TempoImpressao int [not null]
+}
+
+Table Filamento {
+  IdFilamento uuid [pk, not null]
+  Cor varchar(50) [not null]
+  Valor decimal(10,2) [not null]
+  Peso decimal(10,2) [not null, note: 'Peso em gramas']
+  Tipo varchar(10) [not null, note: 'ABS, PETG, PLA ou TPU']
+  DataCompra date [not null]
 }
 
 Table Produto_Composicao {

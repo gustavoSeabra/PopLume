@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PopLume.Infrastructure.DataProvider.Context;
@@ -11,9 +12,11 @@ using PopLume.Infrastructure.DataProvider.Context;
 namespace PopLume.Infrastructure.Migrations
 {
     [DbContext(typeof(PopLumeDbContext))]
-    partial class PopLumeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260727203101_criando-dominio-filamento")]
+    partial class criandodominiofilamento
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
