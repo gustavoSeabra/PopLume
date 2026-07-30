@@ -1,10 +1,13 @@
 ARG IMAGE_TAG=10.0-noble
 
 FROM mcr.microsoft.com/dotnet/aspnet:$IMAGE_TAG AS base
+USER root
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 USER app
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:$IMAGE_TAG AS build
 WORKDIR /
@@ -18,7 +21,7 @@ COPY ["src/API/PopLume.Infrastructure/PopLume.Infrastructure.csproj", "src/PopLu
 RUN dotnet restore "src/PopLume.Api/PopLume.Api.csproj"
 
 # Copia o restante do código fonte
-COPY . .
+COPY ["src/API/", "src/"]
 WORKDIR "/src/PopLume.Api"
 RUN dotnet build "./PopLume.Api.csproj" -c Release -o /app/build
 

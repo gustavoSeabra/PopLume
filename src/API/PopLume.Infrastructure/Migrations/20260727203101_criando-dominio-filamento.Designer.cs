@@ -13,7 +13,7 @@ namespace PopLume.Infrastructure.Migrations
 {
     [DbContext(typeof(PopLumeDbContext))]
     [Migration("20260727203101_criando-dominio-filamento")]
-    partial class criandodominiofilamento
+    partial class CriandoDominioFilamento
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

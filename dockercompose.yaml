@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     container_name: postgres-poplume
@@ -9,6 +7,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "Password1"
       POSTGRES_DB: PopLume
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     ports:
       - 5432:5432
   poplume-api:
@@ -17,12 +21,19 @@ services:
       context: .
       dockerfile: "./docker/dockerfile-poplumeapi"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       ASPNETCORE_HTTP_PORTS: 8080
       ConnectionStrings__PopLumeApi: Host=db;Port=5432;Database=PopLume;Username=postgres;Password=Password1
-    ports:
-      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    expose:
+      - "8080"
 
   poplume-app:
     container_name: poplume-app
@@ -30,7 +41,25 @@ services:
       context: .
       dockerfile: "./docker/dockerfile-poplumeweb"
     depends_on:
-      - poplume-api
+      poplume-api:
+        condition: service_healthy
     restart: always
+    environment:
+      NG_ALLOWED_HOSTS: "localhost,poplume.com.br,www.poplume.com.br"
+      NG_TRUST_PROXY_HEADERS: "X-Forwarded-For,X-Forwarded-Proto"
+    expose:
+      - "4000"
+
+  proxy:
+    container_name: poplume-proxy
+    image: nginx:alpine
+    depends_on:
+      poplume-api:
+        condition: service_healthy
+      poplume-app:
+        condition: service_started
+    restart: always
+    volumes:
+      - "./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro"
     ports:
-      - "8080:4000"
+      - "8080:80"

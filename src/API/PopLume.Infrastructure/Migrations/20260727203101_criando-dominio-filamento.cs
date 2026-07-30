@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PopLume.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class criandodominiofilamento : Migration
+    public partial class CriandoDominioFilamento : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

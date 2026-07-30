@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using PopLume.Api.Extensions;
 using PopLume.Api.Middlewares;
 using PopLume.Infrastructure;
+using PopLume.Infrastructure.DataProvider.Context;
 using PopLume.Infrastructure.Extensions;
 using Scalar.AspNetCore;
 using Serilog;
@@ -22,6 +24,12 @@ builder.Services.AddControllers()
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services
+    .AddHealthChecks()
+    .AddDbContextCheck<PopLumeDbContext>(
+        name: "database",
+        tags: ["ready"]);
+
 // Adicionando as dependencias do projeto
 builder.Services
     .AddDatabase(builder.Configuration)
@@ -33,6 +41,11 @@ builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
 var app = builder.Build();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = healthCheck => healthCheck.Tags.Contains("ready")
+}).ExcludeFromDescription();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
