@@ -1,9 +1,9 @@
 # PopLume Web
 
-## Visão geral
+## Escopo
 
-Frontend do e-commerce PopLume, construído com Angular e integrado à API REST
-em ASP.NET Core.
+Estas instrucoes se aplicam ao frontend em `src/App/poplume-web` e complementam
+as regras do `AGENTS.md` da raiz.
 
 ## Tecnologias
 
@@ -12,37 +12,40 @@ em ASP.NET Core.
 - SCSS
 - Angular Signals
 - Angular `HttpClient`
-- SSR e renderização híbrida
+- SSR e renderizacao hibrida
 - Vitest
 - API REST em ASP.NET Core
 
 ## Comandos
 
 - Desenvolvimento: `npm start`
-- Build de produção: `npm run build`
-- Build contínuo: `npm run watch`
+- Build de producao: `npm run build`
+- Build continuo: `npm run watch`
 - Testes: `npm test`
 - Servir o build SSR: `npm run serve:ssr:poplume-web`
 
-No PowerShell, use `npm.cmd` e `ng.cmd` ao executar comandos diretamente caso a
-política de execução bloqueie os wrappers `.ps1`.
+No PowerShell, use `npm.cmd` e `ng.cmd` quando a politica de execucao bloquear
+os wrappers `.ps1`.
+
+Nao execute esses comandos, nem comandos Docker, sem solicitacao explicita do
+usuario.
 
 ## Arquitetura
 
-Organize o código por funcionalidade:
+Organize o codigo por funcionalidade:
 
-- `core`: autenticação, interceptors, guards, configuração e serviços globais
-- `shared`: componentes, diretivas, pipes e utilitários reutilizáveis
-- `features/catalog`: catálogo, categorias e busca
+- `core`: autenticacao, interceptors, guards, configuracao e servicos globais
+- `shared`: componentes, diretivas, pipes e utilitarios reutilizaveis
+- `features/catalog`: catalogo, categorias e busca
 - `features/product`: detalhes do produto
 - `features/cart`: carrinho
-- `features/checkout`: finalização da compra
+- `features/checkout`: finalizacao da compra
 - `features/account`: conta do cliente
 
-Não coloque regras de negócio em componentes. Mantenha componentes focados em
-apresentação e coordenação da interface.
+Nao coloque regras de negocio em componentes. Mantenha componentes focados em
+apresentacao e coordenacao da interface.
 
-## Convenções Angular
+## Convencoes Angular
 
 - Use componentes standalone.
 - Prefira Signals para estado local e derivado.
@@ -51,52 +54,64 @@ apresentação e coordenação da interface.
   `takeUntilDestroyed()`.
 - Use `ChangeDetectionStrategy.OnPush`.
 - Use lazy loading nas rotas de funcionalidades.
-- Mantenha componentes pequenos e com responsabilidade única.
-- Use Reactive Forms nos formulários.
-- Não use `any` sem justificativa.
+- Mantenha componentes pequenos e com responsabilidade unica.
+- Use Reactive Forms nos formularios.
+- Nao use `any` sem justificativa.
 
-## Integração com a API
+## Integracao com a API
 
-- Centralize a URL da API na configuração de ambiente.
+- No navegador, use apenas URLs relativas iniciadas por `/api`.
+- Exemplo correto: `/api/Produto`.
+- Nao use `localhost:8081` nem o hostname interno `poplume-api`.
+- O Nginx encaminha `/api`, `/scalar`, `/openapi` e `/health` para a API.
 - Mantenha os contratos da API tipados.
-- Prefira gerar os clientes a partir do contrato OpenAPI/Swagger.
-- Não replique regras de negócio pertencentes ao backend.
+- Prefira gerar os clients a partir do contrato OpenAPI.
+- Nao replique regras de negocio pertencentes ao backend.
 - Trate erros HTTP de maneira centralizada.
-- Nunca armazene tokens, credenciais ou segredos no código-fonte.
+- Nao habilite CORS para corrigir uma URL que deveria usar a mesma origem.
+- Nunca armazene tokens, credenciais ou segredos no codigo-fonte.
 
-## SSR e renderização híbrida
+## SSR e renderizacao hibrida
 
-- Código executado durante SSR não pode acessar diretamente `window`,
+- O servidor SSR escuta na porta interna `4000`.
+- Codigo executado durante SSR nao pode acessar diretamente `window`,
   `document`, `localStorage` ou `sessionStorage`.
-- Quando necessário, verifique a plataforma antes de usar APIs exclusivas do
+- Quando necessario, verifique a plataforma antes de usar APIs exclusivas do
   navegador.
-- Páginas públicas de produtos e categorias devem favorecer SSR ou SSG.
-- Carrinho, checkout e conta podem usar renderização no cliente quando isso for
+- Considere que uma requisicao HTTP pode ocorrer no servidor ou no navegador.
+- Nao use o hostname Docker `poplume-api` em codigo compartilhado com o
+  navegador.
+- Paginas publicas de produtos e categorias devem favorecer SSR ou SSG.
+- Carrinho, checkout e conta podem usar renderizacao no cliente quando isso for
   mais apropriado.
-- Dados específicos do usuário não devem entrar no transfer cache.
-- Considere que uma requisição HTTP pode ocorrer tanto no servidor quanto no
-  navegador.
+- Dados especificos do usuario nao devem entrar no transfer cache.
+
+## Hosts e proxy
+
+- Hosts autorizados sao fornecidos por `NG_ALLOWED_HOSTS`.
+- Headers confiaveis do proxy sao definidos por `NG_TRUST_PROXY_HEADERS`.
+- Nao use wildcard em `NG_ALLOWED_HOSTS`.
+- O Nginx deve preservar host e porta com
+  `proxy_set_header Host $http_host`.
+- Ao adicionar um dominio, atualize a allowlist do ambiente de deploy.
 
 ## Estilo
 
 - Use kebab-case em nomes de arquivos e seletores.
 - Use PascalCase em classes e tipos.
-- Use camelCase em variáveis e funções.
-- Escreva os textos exibidos ao usuário em português do Brasil.
-- Preserve acessibilidade, HTML semântico e navegação por teclado.
+- Use camelCase em variaveis e funcoes.
+- Escreva os textos exibidos ao usuario em portugues do Brasil.
+- Preserve acessibilidade, HTML semantico e navegacao por teclado.
 
-## Validação das alterações
+## Validacao
 
-Antes de concluir uma mudança:
-
-1. Execute os testes relacionados.
-2. Execute o build de produção.
-3. Verifique erros de TypeScript.
-4. Verifique o funcionamento com SSR quando aplicável.
-5. Não altere arquivos fora do escopo da tarefa.
+- Nao execute build, testes ou Docker sem solicitacao explicita do usuario.
+- Quando solicitado, verifique TypeScript, testes relacionados, build de
+  producao e SSR conforme o escopo.
+- Nao altere arquivos fora do escopo da tarefa.
 
 ## Git
 
-- Preserve alterações existentes do usuário.
-- Faça mudanças pequenas e focadas.
-- Não faça commit ou push sem solicitação explícita.
+- Preserve alteracoes existentes do usuario.
+- Faca mudancas pequenas e focadas.
+- Nao faca commit ou push sem solicitacao explicita.
