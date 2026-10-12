@@ -87,16 +87,16 @@ Table Categoria {
 
 Table Produto {
   IdProduto uuid [pk, not null]
-  IdCategoria uuid [not null]
+  IdCategoria uuid [null]
   IdEquipamento uuid [null]
   Nome varchar(100) [not null]
-  DescricaoCurta varchar(300) [not null]
-  DescricaoCompleta text [not null]
+  DescricaoCurta varchar(300) [null]
+  DescricaoCompleta text [null]
   Slug varchar(120) [not null]
-  PrazoProducaoDias int [not null]
+  PrazoProducaoDias int [null]
   MargemLucroPercentual decimal(5,2) [not null, default: 60]
-  TempoImpressaoMinutos int [not null]
-  TempoMaoDeObraMinutos int [not null]
+  TempoImpressaoMinutos int [not null, default: 0]
+  TempoMaoDeObraMinutos int [not null, default: 0]
   Ativo boolean [not null, default: false]
   Destaque boolean [not null, default: false]
 
@@ -120,7 +120,7 @@ Table ProdutoVariacao {
   IdProduto uuid [not null]
   Nome varchar(50) [not null]
   Ativa boolean [not null, default: false]
-  PrecoCusto decimal(10,2) [null]
+  PrecoCusto decimal(14,4) [null]
 
   indexes {
     (IdProduto, Nome) [unique]
@@ -143,6 +143,7 @@ Table ProdutoVariacaoMarketplace {
   IdProdutoVariacaoMarketplace uuid [pk, not null]
   IdProdutoVariacao uuid [not null]
   IdMarketplace uuid [not null]
+  IdFichaPrecificacaoAtual uuid [null]
   Ativa boolean [not null, default: true]
 
   indexes {
@@ -232,22 +233,22 @@ Table TaxasMarketplace {
 Table TarifaEnergia {
   IdTarifaEnergia uuid [pk, not null]
   ValorKwh decimal(10,4) [not null]
-  InicioVigencia date [not null]
-  FimVigencia date [null]
+  InicioVigenciaUtc timestamptz [not null]
+  FimVigenciaUtc timestamptz [null]
 
   indexes {
-    InicioVigencia
+    InicioVigenciaUtc
   }
 }
 
 Table CustoMaoDeObra {
   IdCustoMaoDeObra uuid [pk, not null]
   ValorHora decimal(10,2) [not null]
-  InicioVigencia date [not null]
-  FimVigencia date [null]
+  InicioVigenciaUtc timestamptz [not null]
+  FimVigenciaUtc timestamptz [null]
 
   indexes {
-    InicioVigencia
+    InicioVigenciaUtc
   }
 }
 
@@ -287,11 +288,24 @@ Table FichaPrecificacao {
 Table ItemFichaPrecificacao {
   IdItemFichaPrecificacao uuid [pk, not null]
   IdFichaPrecificacao uuid [not null]
+  IdProdutoVariacaoComponente uuid [null, note: 'Obrigatorio quando Tipo = ProdutoComponente; nulo para os demais tipos']
   Tipo varchar(30) [not null, note: 'Filamento, Insumo, ProdutoComponente, Energia, Equipamento, MaoDeObra ou TaxaMarketplace']
   Descricao varchar(200) [not null]
   Quantidade decimal(14,4) [not null]
   ValorUnitario decimal(14,4) [not null]
   ValorTotal decimal(14,4) [not null]
+}
+
+Table Newsletter {
+  IdNewsletter uuid [pk, not null]
+  Email varchar(254) [not null]
+  Ativa boolean [not null, default: true]
+  ConsentimentoEmUtc timestamptz [not null]
+  CanceladaEmUtc timestamptz [null]
+
+  indexes {
+    Email [unique]
+  }
 }
 
 Ref: Usuario.IdPerfil > Perfil.IdPerfil [delete: restrict]
@@ -306,6 +320,7 @@ Ref: ProdutoVariacaoFilamento.IdFilamento > Filamento.IdFilamento [delete: restr
 Ref: ProdutoVariacaoImagem.IdProdutoVariacao > ProdutoVariacao.IdProdutoVariacao [delete: cascade]
 Ref: ProdutoVariacaoMarketplace.IdProdutoVariacao > ProdutoVariacao.IdProdutoVariacao [delete: cascade]
 Ref: ProdutoVariacaoMarketplace.IdMarketplace > Marketplace.IdMarketplace [delete: restrict]
+Ref: ProdutoVariacaoMarketplace.IdFichaPrecificacaoAtual > FichaPrecificacao.IdFichaPrecificacao [delete: restrict]
 
 Ref: ProdutoInsumo.IdProduto > Produto.IdProduto [delete: cascade]
 Ref: ProdutoInsumo.IdInsumo > Insumo.IdInsumo [delete: restrict]
@@ -325,3 +340,4 @@ Ref: FichaPrecificacao.IdMarketplace > Marketplace.IdMarketplace [delete: restri
 Ref: FichaPrecificacao.IdTaxaMarketplace > TaxasMarketplace.IdTaxa [delete: restrict]
 
 Ref: ItemFichaPrecificacao.IdFichaPrecificacao > FichaPrecificacao.IdFichaPrecificacao [delete: cascade]
+Ref: ItemFichaPrecificacao.IdProdutoVariacaoComponente > ProdutoVariacao.IdProdutoVariacao [delete: restrict]

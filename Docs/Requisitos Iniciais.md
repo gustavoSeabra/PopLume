@@ -103,9 +103,107 @@ Usuários inativos não poderão autenticar-se. A inativação não removerá o 
 
 Os perfis serão registros controlados pela aplicação e não poderão ser criados, editados ou excluídos pela área administrativa.
 
-O perfil funcionário, ao gerenciar clientes, ele só conseguirá listar os clientes e clicar em um botão na própria listagem de clientes que enviará um e-mail com o link para o usuário trocar a sua senha.
+Funcionários poderão listar clientes e solicitar o envio de um link de recuperação de senha, mas não poderão modificar seus dados nem definir suas senhas.
 
-O perfil Cliente pode solicitar a troca de senha, com isto, ele recebera um e-mail com um link que redicionará para um formulário onde conseguirá alterar a sua senha.
+Todos os perfis poderão solicitar a recuperação de senha por e-mail, conforme as regras de autenticação abaixo.
+
+### Autenticação e sessões
+
+A autenticação entre o Angular e a API .NET utilizará access tokens JWT, enviados no cabeçalho Authorization com o esquema Bearer.
+
+Somente contas ativas, com e-mail confirmado e senha definida poderão autenticar-se.
+
+O access token terá validade de 15 minutos. A API deverá validar sua assinatura, emissor, destinatário e expiração.
+
+O Angular manterá o access token em memória, sem armazená-lo em localStorage ou sessionStorage.
+
+A renovação do acesso utilizará refresh token em cookie HttpOnly e Secure em produção, com SameSite=Strict e sem acesso pelo JavaScript. No desenvolvimento local por HTTP, Secure poderá ser desabilitado.
+
+As operações que utilizarem esse cookie deverão possuir proteção contra CSRF.
+
+A sessão terá duração máxima de sete dias a partir do login. A renovação não estenderá esse prazo; após seu término, será necessário novo login.
+
+Cada renovação deverá substituir o refresh token por outro, invalidando o anterior. A reutilização de um refresh token já substituído deverá revogar a sessão correspondente.
+
+O servidor deverá manter os dados necessários para controlar expiração, rotação e revogação das sessões. Refresh tokens persistidos deverão ser armazenados somente como hash.
+
+O logout revogará a sessão atual e removerá o cookie de renovação e o access token mantido pelo Angular.
+
+A inativação da conta e a alteração ou redefinição de senha deverão revogar todas as sessões do usuário.
+
+Em cada requisição protegida, a API deverá verificar se a conta permanece ativa e se a sessão permanece válida. Um JWT ainda não expirado não permitirá acesso após a revogação da sessão ou a inativação da conta.
+
+A autorização será validada pela API conforme o perfil do usuário. Ocultar recursos na interface não substituirá essa validação.
+
+### Cadastro público e confirmação de e-mail
+
+O cadastro público será exclusivo para clientes e exigirá nome, e-mail, telefone e senha.
+
+A API atribuirá obrigatoriamente o perfil Cliente, independentemente de qualquer perfil enviado pelo frontend.
+
+Após o cadastro, o sistema enviará um link para confirmação do e-mail, com validade de 24 horas e uso único.
+
+O cliente deverá confirmar seu e-mail antes do primeiro login.
+
+Será possível solicitar o reenvio do link. A emissão de um novo link invalidará os anteriores ainda não utilizados.
+
+A confirmação de e-mail da conta será independente da newsletter, cuja inscrição continuará sendo ativada imediatamente conforme suas regras próprias.
+
+### Recuperação e alteração de senha
+
+A recuperação de senha poderá ser solicitada sem autenticação, informando o e-mail.
+
+A interface deverá apresentar a mesma mensagem, exista ou não uma conta com o endereço informado: “Se houver uma conta elegível para este e-mail, enviaremos as instruções para recuperação de senha.”
+
+Para contas ativas com senha definida, o sistema enviará um link de recuperação com validade de uma hora e uso único.
+
+A emissão de um novo link de recuperação invalidará os anteriores ainda não utilizados.
+
+O link permitirá definir uma nova senha, sem solicitar a senha anterior. A recuperação não reativará contas nem substituirá a confirmação de e-mail.
+
+Após a redefinição, todas as sessões e links de recuperação anteriores deverão ser invalidados. O usuário deverá efetuar novo login.
+
+Para alterar a senha estando autenticado, será obrigatório informar a senha atual e a nova senha. Após a alteração, todas as sessões serão revogadas e será solicitado novo login.
+
+Senhas e tokens não poderão ser registrados em logs nem apresentados na área administrativa.
+
+### Proteção contra tentativas repetidas
+
+Após cinco tentativas consecutivas de login com senha incorreta para uma conta existente, novos logins nessa conta serão bloqueados por 15 minutos.
+
+Após o término do bloqueio, será permitida uma nova sequência de tentativas. Um login bem-sucedido zerará o contador de falhas.
+
+Falhas de login deverão apresentar mensagem genérica, sem revelar a existência da conta.
+
+Login, recuperação de senha, reenvio de confirmação e reenvio de convites também deverão possuir limitação de requisições, com parâmetros definidos durante o desenvolvimento.
+
+### Usuários administrativos e convites
+
+Somente administradores poderão cadastrar, consultar, editar, ativar e inativar funcionários e cadastrar administradores adicionais.
+
+O perfil será definido na criação da conta e não poderá ser alterado pela edição comum de dados.
+
+Ao cadastrar um funcionário, outro administrador ou um cliente pela área administrativa, o sistema enviará um convite para que o destinatário defina sua própria senha.
+
+O convite terá validade de 24 horas e uso único. Sua conclusão confirmará o e-mail e registrará a senha definida pelo destinatário.
+
+Enquanto o convite não for concluído, a conta não poderá autenticar-se.
+
+Será permitido reenviar o convite, invalidando os anteriores ainda não utilizados.
+
+O administrador não poderá consultar nem definir manualmente a senha de outra pessoa.
+
+A conclusão de um convite não reativará uma conta que tenha sido inativada.
+
+### Primeiro administrador
+
+O primeiro administrador será criado por um procedimento restrito de configuração inicial, sem cadastro público e sem credenciais fixas no código ou no repositório.
+
+Esse procedimento somente poderá ser utilizado enquanto não existir nenhuma conta com perfil Administrador.
+
+O primeiro administrador deverá definir sua própria senha e confirmar seu e-mail pelo fluxo de convite.
+
+O sistema deverá impedir a inativação do último administrador ativo com e-mail confirmado e senha definida.
 
 ## Fluxo público do MVP
 
@@ -210,6 +308,10 @@ O único módulo vendável é o de produtos. Os demais são cadastros para contr
 Os cadastros auxiliares fornecerão os dados utilizados no catálogo, na ficha técnica e na formação de preço. Alterações nesses cadastros não modificarão fichas históricas de precificação.
 
 Quando um custo, taxa ou dado de produção for alterado, os preços vigentes dos produtos permanecerão inalterados até que uma nova precificação seja confirmada. O sistema não executará reprecificação automática somente pela alteração de um cadastro auxiliar.
+
+Após o cadastro de uma nova tarifa de energia ou de um novo custo de mão de obra, o sistema deverá oferecer ao administrador a atualização geral dos preços dos produtos ativos. Essa operação dependerá de confirmação específica, conforme a seção [Atualização geral por alteração de energia ou mão de obra](#atualização-geral-por-alteração-de-energia-ou-mão-de-obra).
+
+O administrador poderá executar essa atualização posteriormente pela área administrativa, utilizando os custos então vigentes.
 
 As listagens administrativas deverão permitir paginação, busca e filtros compatíveis com o estado de cada cadastro. Operações de inativação, exclusão lógica e encerramento de vigência deverão solicitar confirmação.
 
@@ -371,18 +473,32 @@ As tarifas de energia representarão o valor do quilowatt-hora utilizado na form
 Cada tarifa deverá possuir:
 
 - Valor do quilowatt-hora.
-- Data de início da vigência.
-- Data de fim da vigência, opcionalmente.
+- Data e hora de início da vigência, preenchidas pelo sistema.
+- Data e hora de fim da vigência, preenchidas pelo sistema quando houver substituição.
 
-O valor do quilowatt-hora deverá ser maior que zero. Quando informada, a data final deverá ser maior ou igual à data inicial.
+O valor do quilowatt-hora deverá ser maior que zero. Quando existir, o instante final deverá ser posterior ao instante inicial.
 
-As datas inicial e final serão inclusivas. Não poderão existir períodos de vigência sobrepostos. Uma tarifa sem data final permanecerá vigente por prazo indeterminado e impedirá o cadastro de outra tarifa com vigência sobreposta.
+O início da vigência será inclusivo e o fim será exclusivo. Não poderão existir períodos sobrepostos. Uma tarifa sem fim de vigência permanecerá vigente por prazo indeterminado.
 
-A tarifa vigente será aquela cujo período contenha a data em que a precificação for calculada. Deverá existir no máximo uma tarifa vigente para cada data.
+O início da vigência será o instante em que o cadastro for efetivado, determinado pelo sistema. Não será permitido informar uma vigência retroativa ou futura.
 
-Uma tarifa que ainda não tenha sido utilizada poderá ser editada ou removida. Depois de utilizada em uma ficha de precificação, seus valores e datas não poderão ser alterados nem removidos.
+Os instantes de vigência serão armazenados em UTC e apresentados na interface no fuso horário da loja. Os campos de início e fim não poderão ser editados manualmente.
 
-O encerramento de uma tarifa vigente deverá ajustar sua data final. O cadastro da tarifa seguinte não poderá criar sobreposição.
+A tarifa vigente será aquela cujo período contenha o instante do cálculo da precificação, registrado em CalculadaEmUtc. Deverá existir no máximo uma tarifa vigente em cada instante.
+
+Uma tarifa que ainda não tenha sido utilizada poderá ter seu valor editado ou ser removida. Depois de utilizada em uma ficha de precificação, seu valor e seu início de vigência não poderão ser alterados, e o registro não poderá ser removido. Seu fim de vigência poderá ser preenchido pelo sistema exclusivamente na substituição por uma nova tarifa.
+
+Ao cadastrar uma nova tarifa, o sistema deverá encerrar a tarifa vigente no mesmo instante em que iniciar a nova. Como o fim é exclusivo, esse instante pertencerá somente à nova tarifa.
+
+Antes da confirmação, a interface deverá informar que o cadastro substituirá imediatamente a tarifa vigente.
+
+O encerramento da tarifa anterior e o cadastro da nova deverão ocorrer na mesma transação. Se qualquer etapa falhar, nenhuma das alterações será persistida.
+
+Quando não houver tarifa vigente, somente a nova tarifa será criada, sem fim de vigência e sem sobreposição com períodos existentes.
+
+A substituição deverá preservar todas as fichas históricas. Nenhuma ficha poderá ficar fora do período de vigência da tarifa que utilizou.
+
+A substituição da tarifa, por si só, não alterará os preços vigentes dos produtos.
 
 Somente administradores poderão gerenciar tarifas de energia.
 
@@ -393,18 +509,32 @@ Os custos de mão de obra representarão o valor da hora de trabalho utilizado n
 Cada custo de mão de obra deverá possuir:
 
 - Valor da hora.
-- Data de início da vigência.
-- Data de fim da vigência, opcionalmente.
+- Data e hora de início da vigência, preenchidas pelo sistema.
+- Data e hora de fim da vigência, preenchidas pelo sistema quando houver substituição.
 
-O valor da hora deverá ser maior que zero. Quando informada, a data final deverá ser maior ou igual à data inicial.
+O valor da hora deverá ser maior que zero. Quando existir, o instante final deverá ser posterior ao instante inicial.
 
-As datas inicial e final serão inclusivas. Não poderão existir períodos de vigência sobrepostos. Um custo sem data final permanecerá vigente por prazo indeterminado e impedirá o cadastro de outro custo com vigência sobreposta.
+O início da vigência será inclusivo e o fim será exclusivo. Não poderão existir períodos sobrepostos. Um custo sem fim de vigência permanecerá vigente por prazo indeterminado.
 
-O custo vigente será aquele cujo período contenha a data em que a precificação for calculada. Deverá existir no máximo um custo de mão de obra vigente para cada data.
+O início da vigência será o instante em que o cadastro for efetivado, determinado pelo sistema. Não será permitido informar uma vigência retroativa ou futura.
 
-Um custo que ainda não tenha sido utilizado poderá ser editado ou removido. Depois de utilizado em uma ficha de precificação, seus valores e datas não poderão ser alterados nem removidos.
+Os instantes de vigência serão armazenados em UTC e apresentados na interface no fuso horário da loja. Os campos de início e fim não poderão ser editados manualmente.
 
-O encerramento de um custo vigente deverá ajustar sua data final. O cadastro do custo seguinte não poderá criar sobreposição.
+O custo vigente será aquele cujo período contenha o instante do cálculo da precificação, registrado em CalculadaEmUtc. Deverá existir no máximo um custo de mão de obra vigente em cada instante.
+
+Um custo que ainda não tenha sido utilizado poderá ter seu valor editado ou ser removido. Depois de utilizado em uma ficha de precificação, seu valor e seu início de vigência não poderão ser alterados, e o registro não poderá ser removido. Seu fim de vigência poderá ser preenchido pelo sistema exclusivamente na substituição por um novo custo.
+
+Ao cadastrar um novo custo de mão de obra, o sistema deverá encerrar o custo vigente no mesmo instante em que iniciar o novo. Como o fim é exclusivo, esse instante pertencerá somente ao novo custo.
+
+Antes da confirmação, a interface deverá informar que o cadastro substituirá imediatamente o custo vigente.
+
+O encerramento do custo anterior e o cadastro do novo deverão ocorrer na mesma transação. Se qualquer etapa falhar, nenhuma das alterações será persistida.
+
+Quando não houver custo vigente, somente o novo custo será criado, sem fim de vigência e sem sobreposição com períodos existentes.
+
+A substituição deverá preservar todas as fichas históricas. Nenhuma ficha poderá ficar fora do período de vigência do custo que utilizou.
+
+A substituição do custo, por si só, não alterará os preços vigentes dos produtos.
 
 Somente administradores poderão gerenciar custos de mão de obra.
 
@@ -437,7 +567,9 @@ apagado quando ela for encerrada.
 
 ### Importante!
 
-Antes de enviar o e-mail e abrir o WhatsApp, a API deverá validar os produtos, as variações de cor, as quantidades e os preços de venda atuais. O preço utilizado será sempre o preço de venda atual da variação no catálogo no momento da solicitação, independentemente do valor anteriormente exibido ou mantido no carrinho. Caso o preço tenha sido alterado, o carrinho deverá ser atualizado e o novo preço deverá ser informado ao usuário. Os preços definidos para marketplaces não serão utilizados nesse fluxo.
+Antes de enviar o e-mail e abrir o WhatsApp, a API deverá validar os produtos, as variações de cor, as quantidades e os preços de venda atuais. O preço utilizado será sempre o preço de venda atual da variação no catálogo no momento da solicitação, independentemente do valor anteriormente exibido ou mantido no carrinho. Os preços definidos para marketplaces não serão utilizados nesse fluxo.
+
+Caso algum preço tenha sido alterado, inclusive para um valor menor, a API deverá retornar os preços atualizados sem enviar o e-mail. O carrinho deverá exibir os valores anteriores e atuais e solicitar nova confirmação do cliente, sem abrir o WhatsApp. A cada confirmação, a API repetirá a validação. O envio somente continuará quando os preços apresentados ao cliente corresponderem aos preços atuais do catálogo.
 
 ### Fluxo do Carrinho:
 
@@ -448,6 +580,16 @@ Frontend envia a solicitação para a API
         ↓
 API valida produtos, cores, quantidades e preços
         ↓
+Houve alteração de preço?
+        ├── Sim → API retorna os preços atualizados, sem enviar e-mail
+        │          ↓
+        │        Carrinho exibe os valores anteriores e atuais,
+        │        sem abrir o WhatsApp
+        │          ↓
+        │        Cliente confirma novamente → Retorna à validação pela API
+        │
+        └── Não
+              ↓
 API tenta enviar a cópia por e-mail
         ↓
 Frontend abre o WhatsApp com a mensagem preenchida
@@ -537,6 +679,8 @@ As unidades de medida permitidas serão:
 - Mililitro.
 - Litro.
 
+A unidade de medida não poderá ser alterada enquanto o insumo possuir associações com produtos, evitando modificar o significado das quantidades já cadastradas.
+
 O valor da compra e a quantidade comprada deverão ser maiores que zero.
 
 O custo unitário do insumo será calculado automaticamente:
@@ -621,7 +765,7 @@ Cada variação pertencerá a um único produto e deverá possuir:
 - Preço de custo vigente.
 - Preço de venda atual no catálogo, obtido da ficha confirmada mais recente sem marketplace.
 - Zero ou mais vínculos com marketplaces.
-- Preço de venda atual em cada marketplace com vínculo ativo, obtido da ficha confirmada mais recente para o respectivo marketplace.
+- Preço de venda atual em cada marketplace com vínculo ativo, quando definido, obtido da ficha de precificação atual referenciada pelo vínculo.
 
 Ao ser criada, a variação iniciará inativa e poderá permanecer como rascunho enquanto seu cadastro estiver incompleto.
 
@@ -647,17 +791,23 @@ A ativação ou inativação de uma variação não alterará o estado das demai
 
 Uma variação poderá ser vinculada a zero ou mais marketplaces.
 
-O vínculo indicará que a variação é comercializada naquele marketplace e não armazenará seu preço de venda.
+O vínculo indicará que a variação é comercializada naquele marketplace. Ele não armazenará o valor do preço de venda, mas poderá armazenar uma referência à ficha de precificação que define seu preço atual.
 
 Cada combinação de variação e marketplace deverá ser única.
 
 Ao vincular uma variação a um marketplace, o vínculo será criado como ativo.
 
+Um vínculo recém-criado não possuirá referência a uma ficha de precificação atual.
+
+Um vínculo ativo poderá permanecer sem preço atual. Nessa situação, a área administrativa deverá apresentar “Aguardando precificação”.
+
 Um vínculo ativo permitirá:
 
 - Realizar precificações da variação para o marketplace.
-- Consultar seu preço de venda atual no marketplace.
+- Consultar seu preço de venda atual no marketplace, quando houver uma ficha de precificação atual referenciada pelo vínculo.
 - Incluir o marketplace na reprecificação em lote.
+
+Um vínculo ativo sem preço atual também participará da reprecificação em lote, desde que sua variação seja elegível e o marketplace não esteja excluído. A confirmação da operação definirá seu preço atual.
 
 Um vínculo inativo:
 
@@ -670,6 +820,16 @@ Um vínculo inativo:
 A exclusão lógica do marketplace tornará indisponíveis todos os seus vínculos, sem alterar o histórico.
 
 A reativação de um vínculo não criará uma nova ficha de precificação. O preço anterior continuará disponível no histórico, mas uma nova precificação deverá ser confirmada para definir um novo preço atual.
+
+Ao inativar um vínculo, sua referência à ficha de precificação atual será removida, sem excluir ou alterar as fichas históricas.
+
+Ao reativar o vínculo, essa referência permanecerá vazia até a confirmação de uma nova precificação.
+
+Toda precificação confirmada para o vínculo, individualmente ou em lote, deverá atualizar essa referência para a nova ficha gerada.
+
+A ficha referenciada deverá pertencer à mesma variação e ao mesmo marketplace do vínculo.
+
+A criação da ficha e a atualização da referência deverão ocorrer na mesma transação.
 
 ### Imagens da variação
 
@@ -767,7 +927,8 @@ Cada associação entre um produto e um insumo deverá armazenar:
 
 - Insumo utilizado.
 - Quantidade consumida.
-- Unidade de medida.
+
+A quantidade consumida será informada na mesma unidade de medida cadastrada no insumo. A interface deverá exibir essa unidade junto ao campo de quantidade. A associação não armazenará unidade própria.
 
 A quantidade consumida deverá ser maior que zero.
 
@@ -794,6 +955,25 @@ Um produto:
 - Somente poderá utilizar uma variação componente que possua preço de custo vigente.
 
 Exemplo: um Kit Dia dos Pais poderá ser composto por um chaveiro, um porta-retrato e um porta-celular.
+
+### Cadastro incompleto de produto
+
+Um produto inativo poderá ser cadastrado parcialmente, sem necessidade de um estado específico de rascunho.
+
+Para iniciar o cadastro:
+
+- O nome será obrigatório.
+- O identificador interno será gerado pelo banco de dados.
+- O slug será gerado automaticamente a partir do nome. Em caso de duplicidade, o sistema acrescentará um sufixo para garantir sua unicidade.
+- A margem será preenchida inicialmente com 60%, respeitando as permissões existentes para sua alteração.
+- O produto será criado como inativo.
+- Os tempos de impressão e de mão de obra serão preenchidos inicialmente com zero.
+
+Categoria, descrição curta, descrição completa e prazo de produção poderão permanecer não informados enquanto o produto estiver inativo. O equipamento, os demais dados da ficha técnica e as variações poderão ser cadastrados posteriormente.
+
+A alteração do nome não modificará automaticamente o slug.
+
+A ativação exigirá o atendimento de todos os critérios definidos na seção [Ativação, inativação e publicação no catálogo](#ativação-inativação-e-publicação-no-catálogo).
 
 ### Ativação, inativação e publicação no catálogo
 
@@ -853,6 +1033,14 @@ Ao reativar o produto:
 
 Não poderá existir um produto ativo sem pelo menos uma variação ativa.
 
+#### Edição de produto ativo
+
+As alterações em um produto ativo deverão preservar todos os requisitos necessários à sua publicação.
+
+O sistema deverá rejeitar alterações que deixem o produto sem informações obrigatórias ou sem pelo menos uma variação ativa e válida, informando quais requisitos deixariam de ser atendidos.
+
+Para manter o cadastro incompleto, o usuário deverá primeiro inativar o produto, seguindo as regras de inativação existentes.
+
 ## Módulo Formação de Preço
 
 O módulo de formação de preço faz parte do MVP e será utilizado por funcionários e administradores. Seu objetivo será calcular o custo de produção e sugerir um preço de venda tanto para uma variação específica de um produto cadastrado quanto para um orçamento avulso, com base nos dados de produção, nos custos vigentes e no canal de venda.
@@ -863,7 +1051,7 @@ Os preços de venda atuais não serão armazenados diretamente na variação. El
 
 Para o catálogo, será utilizado o preço da ficha confirmada mais recente da variação que não possua marketplace.
 
-Para um marketplace com vínculo ativo, será utilizado o preço da ficha confirmada mais recente da variação associada àquele marketplace.
+Para um marketplace com vínculo ativo, será utilizado o preço da ficha de precificação atual referenciada pelo vínculo. Na ausência dessa referência, o vínculo não possuirá preço atual.
 
 As fichas históricas serão imutáveis. Uma nova confirmação criará outra ficha e não atualizará fichas existentes.
 
@@ -871,7 +1059,7 @@ Cada variação poderá possuir:
 
 - Um preço de custo vigente.
 - Um preço de venda atual para o catálogo, obtido de sua ficha confirmada mais recente sem marketplace.
-- Um preço de venda atual para cada marketplace com vínculo ativo, obtido da ficha confirmada mais recente do respectivo marketplace.
+- Um preço de venda atual para cada marketplace com vínculo ativo, quando definido, obtido da ficha de precificação atual referenciada pelo vínculo.
 - Uma ou mais fichas históricas de precificação.
 
 Cada precificação confirmada gerará uma ou mais fichas históricas imutáveis, conforme as regras da seção [Simulação e confirmação](#simulação-e-confirmação).
@@ -1079,7 +1267,7 @@ Cada insumo deverá possuir valor da compra, quantidade comprada e unidade de me
 
 `Custo utilizado = Quantidade utilizada × Custo unitário`
 
-A unidade utilizada no produto deverá ser compatível com a unidade cadastrada no insumo.
+A quantidade utilizada no produto deverá estar expressa na mesma unidade de medida cadastrada no insumo. O sistema não realizará conversões de unidades.
 
 ### Custo de energia
 
@@ -1267,7 +1455,7 @@ Quando a precificação confirmada não possuir marketplace:
 Quando a precificação confirmada possuir marketplace:
 
 - O preço de venda atual da variação no catálogo não será alterado.
-- A nova ficha será a referência do preço atual da variação no marketplace selecionado.
+- O vínculo com o marketplace selecionado será atualizado para referenciar a nova ficha como fonte do preço atual.
 - Os preços registrados para os demais marketplaces não serão alterados.
 
 #### Confirmação com alteração da margem do produto
@@ -1278,7 +1466,7 @@ Quando o administrador confirmar uma precificação utilizando uma margem difere
 - Todas as variações elegíveis do produto serão recalculadas imediatamente com a nova margem.
 - O preço de custo vigente de cada variação recalculada será atualizado.
 - Será criada uma nova ficha sem marketplace para definir o novo preço atual do catálogo de cada variação recalculada.
-- Será criada uma nova ficha para cada marketplace com vínculo ativo, definindo seu novo preço atual.
+- Será criada uma nova ficha para cada marketplace com vínculo ativo, e o respectivo vínculo será atualizado para referenciá-la como fonte do preço atual.
 - Será criada uma ficha histórica de precificação para cada variação e canal efetivamente recalculado.
 - Cada ficha histórica armazenará a margem utilizada e todos os dados considerados no respectivo cálculo.
 
@@ -1344,9 +1532,112 @@ O equipamento selecionado somente para a simulação original não será aplicad
 
 Marketplaces com vínculo inativo não serão considerados na reprecificação em lote e não impedirão a operação.
 
+### Atualização geral por alteração de energia ou mão de obra
+
+A atualização geral permitirá recalcular os preços dos produtos ativos com os custos vigentes, após alterações nas tarifas de energia ou nos custos de mão de obra.
+
+Somente administradores poderão confirmar essa operação.
+
+O cadastro do novo custo e a atualização geral serão operações separadas. Cancelar a atualização ou encontrar pendências não desfará o cadastro do custo nem o encerramento da vigência anterior.
+
+#### Seleção e parâmetros
+
+Serão consideradas as variações ativas dos produtos ativos e os componentes necessários à sua produção.
+
+Para cada variação ativa de produto ativo, a operação deverá:
+
+- Utilizar a ficha técnica atual e o equipamento padrão do produto.
+- Utilizar os custos vigentes dos filamentos e insumos.
+- Utilizar a tarifa de energia e o custo de mão de obra vigentes no instante do cálculo.
+- Preservar a margem cadastrada no produto.
+- Considerar quantidade produzida igual a uma unidade.
+- Recalcular o custo vigente.
+- Gerar uma nova ficha para o catálogo.
+- Gerar uma nova ficha para cada marketplace não excluído com vínculo ativo.
+- Atualizar as referências às fichas atuais dos vínculos com marketplaces.
+
+Vínculos ativos sem preço atual também serão considerados. Vínculos inativos e marketplaces excluídos não serão precificados.
+
+As regras existentes de cálculo, precisão, arredondamento e validação dos custos continuarão aplicáveis.
+
+#### Conferência e confirmação
+
+Antes da confirmação, o sistema deverá apresentar:
+
+- Os produtos e variações que poderão ser atualizados.
+- Os preços atuais e os novos preços calculados por canal.
+- Os produtos com pendências e os respectivos motivos.
+- Os componentes inativos cujo custo precisará ser atualizado.
+
+A simulação não persistirá custos, preços ou fichas.
+
+Se os dados utilizados no cálculo forem alterados antes da persistência, o sistema deverá invalidar os resultados afetados e solicitar nova conferência, sem gravar preços diferentes dos confirmados.
+
+#### Produtos com pendências
+
+Uma pendência em um produto não impedirá a atualização dos demais produtos independentes.
+
+Serão exemplos de pendências:
+
+- Ausência de equipamento padrão ou utilização de equipamento excluído.
+- Composição de filamentos inválida ou utilização de filamento inativo.
+- Ausência de dados necessários ao cálculo dos insumos.
+- Ausência de tarifa de energia ou custo de mão de obra vigente.
+- Impossibilidade de determinar uma faixa válida de marketplace.
+- Impossibilidade de recalcular um componente necessário.
+
+Um insumo excluído logicamente, ainda associado ao produto e com dados de custo preservados, continuará permitido conforme as regras existentes.
+
+A atualização de cada produto deverá ocorrer em uma única transação, abrangendo todas as suas variações ativas e os canais aplicáveis.
+
+Se uma variação ou canal impedir a atualização do produto, seus custos e preços anteriores serão mantidos e nenhuma ficha parcial desse produto será criada.
+
+Ao final, o sistema deverá apresentar os produtos atualizados e os produtos não atualizados, identificando as variações, canais ou componentes responsáveis por cada pendência.
+
+Essa operação não altera a regra de confirmação com alteração da margem: a alteração de margem de um produto continuará seguindo sua transação única e suas regras próprias.
+
+#### Ordem de atualização dos produtos compostos
+
+O sistema deverá identificar as dependências de composição e calcular os componentes antes dos produtos que os utilizam.
+
+Essa ordenação deverá considerar todos os níveis de composição. Composições cíclicas continuarão proibidas.
+
+Uma variação componente ativa pertencente a um produto ativo seguirá o fluxo normal de atualização, com histórico e preços dos canais aplicáveis.
+
+O produto composto deverá utilizar os custos atualizados dos componentes. Se a atualização de um componente necessário falhar, o produto dependente ficará pendente e manterá seus preços anteriores.
+
+Um componente compartilhado será calculado uma única vez na operação, e seu resultado será reutilizado pelos produtos dependentes, desde que os dados utilizados permaneçam válidos.
+
+#### Exceção para componentes inativos
+
+Exclusivamente nesta atualização geral, uma variação inativa ou pertencente a um produto inativo poderá ter seu custo recalculado quando for necessária, direta ou indiretamente, à composição de uma variação ativa de um produto ativo.
+
+Para esses componentes:
+
+- Será atualizado somente o campo PrecoCusto da variação, com quatro casas decimais.
+- Não será criada ficha histórica própria para essa atualização.
+- Não serão alterados os preços de venda do catálogo ou dos marketplaces.
+- Não serão alterados os estados de ativação do produto ou da variação.
+- Serão exigidos os dados e as validações necessários ao cálculo do custo.
+- Não serão exigidos imagem, publicação no catálogo ou preço de venda vigente.
+
+A ausência de histórico próprio será intencional e restrita a essa situação. O custo vigente do componente poderá diferir do custo registrado em sua última ficha histórica.
+
+A ficha do produto composto deverá preservar a identificação da variação componente, a quantidade, o custo unitário utilizado e o custo total correspondente, sem registrar o detalhamento interno do recálculo do componente inativo.
+
+Os custos dos componentes inativos ainda não persistidos na operação deverão ser gravados na mesma transação da atualização do produto ativo que deles depende.
+
+Se essa transação falhar, essas atualizações de custo também serão desfeitas.
+
+Quando o custo de um componente compartilhado já tiver sido persistido com sucesso para outro produto na mesma operação, ele será reutilizado. Uma falha em um produto posterior não desfará atualizações já concluídas.
+
+Componentes inativos sem dependência com os produtos ativos selecionados não serão atualizados.
+
 ### Histórico
 
 Cada precificação confirmada deverá gerar uma ficha histórica imutável, associada ao produto e à variação precificada.
+
+A atualização exclusiva do custo de componentes inativos na atualização geral não será considerada uma precificação comercial confirmada e não gerará ficha própria, conforme a exceção definida nessa operação.
 
 A ficha deverá armazenar produto, variação, equipamento, tarifa de energia, custo de mão de obra, marketplace e faixa utilizados, data e hora do cálculo, margem, quantidade produzida, custos detalhados, custo unitário, comissão, taxa fixa, lucro unitário e preço de venda.
 
@@ -1356,7 +1647,7 @@ Alterações posteriores nos cadastros não deverão alterar fichas anteriores. 
 
 O módulo de formação de preço faz parte do MVP.
 
-O preço de custo da variação não será informado manualmente. Ele será atualizado somente após a confirmação de uma precificação.
+O preço de custo da variação não será informado manualmente. Ele será atualizado após a confirmação de uma precificação ou, exclusivamente para componentes inativos necessários a produtos ativos, pela atualização de custo sem histórico prevista na atualização geral por alteração de energia ou mão de obra.
 
 As cores e quantidades de filamento utilizadas na produção serão cadastradas na variação do produto. O custo correspondente será calculado automaticamente a partir do valor por grama de cada filamento.
 
@@ -1367,13 +1658,40 @@ Na consulta administrativa do produto, cada variação deverá apresentar separa
 - O preço de custo vigente.
 - O preço da ficha confirmada mais recente sem marketplace, utilizado como preço atual do catálogo.
 - Os marketplaces vinculados e o estado de cada vínculo.
-- O preço da ficha confirmada mais recente de cada marketplace com vínculo ativo.
+- O preço da ficha de precificação atual referenciada por cada vínculo ativo com marketplace ou a indicação “Aguardando precificação”, quando não houver referência.
 - O histórico de preços dos marketplaces com vínculo inativo.
 
 ## Módulo Newsletter e LGPD
 
-Criar uma página para consentimento explicíto, política de privacidade.
-Sobre a Newsletter, criar uma rota na API para poder armazenar os e-mails dos clientes, data e origem do consentimento. E uma outra rota para remover o e-mail do cliente, cancelando sua inscrição na newsletter.
+Disponibilizar uma página de política de privacidade e solicitar consentimento explícito para a inscrição na newsletter.
+
+A inscrição será independente da conta de usuário. Qualquer visitante poderá informar seu e-mail no rodapé e marcar a opção de consentimento, inicialmente desmarcada. O cadastro de uma conta não inscreverá automaticamente o usuário na newsletter.
+
+A API deverá validar o e-mail, remover espaços nas extremidades e convertê-lo para minúsculas antes de armazená-lo. O e-mail deverá ser único.
+
+Cada inscrição será armazenada em Newsletter e possuirá:
+
+- Identificador interno IdNewsletter.
+- E-mail.
+- Estado ativo ou inativo.
+- Data e hora do consentimento em UTC.
+- Data e hora do cancelamento em UTC, quando aplicável.
+
+Não serão armazenados campos separados de e-mail normalizado, origem do consentimento ou versão do termo de consentimento.
+
+Após o envio com consentimento, a inscrição será ativada imediatamente e a interface exibirá “Cadastro na newsletter realizado com sucesso!”. Não haverá confirmação por e-mail antes da ativação.
+
+Quando o e-mail já possuir inscrição ativa, o sistema apresentará a mesma mensagem, sem duplicar o registro nem substituir a data do consentimento anterior.
+
+O cancelamento marcará a inscrição como inativa e registrará a data e hora em CanceladaEmUtc, sem remover fisicamente o registro.
+
+A reinscrição exigirá novo consentimento explícito, reativará o mesmo registro, atualizará ConsentimentoEmUtc e limpará CanceladaEmUtc. Não haverá histórico completo de inscrições e cancelamentos no MVP.
+
+A API deverá disponibilizar operações de inscrição e cancelamento. O assinante poderá cancelar por um link com token validado pela API, sem autenticação em uma conta. Informar somente o e-mail não será suficiente para cancelar a inscrição.
+
+Funcionários e administradores poderão listar, buscar, filtrar e cancelar inscrições. A ativação dependerá da inscrição feita pelo próprio visitante.
+
+O envio de campanhas não fará parte do MVP.
 
 # Evoluções Futuras
 
