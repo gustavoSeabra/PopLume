@@ -69,7 +69,39 @@ Abaixo uma tabela contendo os perfis e o que cada um pode fazer nesta etapa do p
 | Gerenciar Categorias | Não | Sim | Sim | Sim |
 
 
-O perfil funcionário não pode ser um cliente simultaneamente. Para isto, ele precisa ter uma conta com perfil de cliente e uma conta com perfil de funcionário.
+### Contas de usuário e perfis
+
+A aplicação possuirá três perfis fixos:
+
+- Cliente.
+- Funcionário.
+- Administrador.
+
+Cada conta de usuário possuirá exatamente um perfil.
+
+Uma conta não poderá acumular os perfis de Cliente, Funcionário ou Administrador. Quando a mesma pessoa precisar utilizar a aplicação com finalidades diferentes, deverá possuir contas distintas, com endereços de e-mail diferentes.
+
+O e-mail será utilizado como identificador para autenticação e deverá ser único na aplicação. A comparação de e-mails não diferenciará letras maiúsculas de minúsculas.
+
+O usuário deverá possuir:
+
+- Identificador interno único, gerado pelo banco de dados.
+- Nome.
+- E-mail.
+- Senha armazenada exclusivamente como hash.
+- Telefone, quando aplicável.
+- Perfil.
+- Estado ativo ou inativo.
+- Indicador de confirmação do e-mail.
+- Data e hora de criação.
+- Data e hora da última atualização.
+- Data e hora do último acesso, quando aplicável.
+
+Para usuários com perfil Cliente, nome, e-mail e telefone serão obrigatórios, pois serão utilizados no envio da lista de interesse.
+
+Usuários inativos não poderão autenticar-se. A inativação não removerá o usuário nem seus relacionamentos históricos.
+
+Os perfis serão registros controlados pela aplicação e não poderão ser criados, editados ou excluídos pela área administrativa.
 
 O perfil funcionário, ao gerenciar clientes, ele só conseguirá listar os clientes e clicar em um botão na própria listagem de clientes que enviará um e-mail com o link para o usuário trocar a sua senha.
 
@@ -87,6 +119,7 @@ O MVP terá:
 - Redirecionamento para o canal de atendimento
 - Login, cadastro e recuperação de senha
 - Edição dos dados da conta de usuário (Cliente)
+- Cadastro e gerenciamento de endereços do cliente
 - Política de privacidade e termos de uso
 - Políticas de troca e devolução aplicáveis à compra online
 
@@ -95,7 +128,6 @@ O MVP terá:
 Não fazem parte do MVP:
 
 - Checkout dentro da aplicação
-- Cadastro de endereços de entrega
 - Cálculo de frete
 - Pagamento online
 - Confirmação de pedido
@@ -166,12 +198,215 @@ Os primeiros módulos do sistema serão produtos, categorias de produtos, banner
 - Cadastro com máscaras e validações dos formulários
 - Edição
 - Visualização
-- Ativação/inativação
+- Ativação, inativação ou exclusão lógica, conforme aplicável ao cadastro
 - Paginação
 - Confirmação de operações
 - Estados de carregamento, erro, vazio e indisponibilidade
 
 O único módulo vendável é o de produtos. Os demais são cadastros para controle interno e montagem de preço de venda. 
+
+## Cadastros auxiliares
+
+Os cadastros auxiliares fornecerão os dados utilizados no catálogo, na ficha técnica e na formação de preço. Alterações nesses cadastros não modificarão fichas históricas de precificação.
+
+Quando um custo, taxa ou dado de produção for alterado, os preços vigentes dos produtos permanecerão inalterados até que uma nova precificação seja confirmada. O sistema não executará reprecificação automática somente pela alteração de um cadastro auxiliar.
+
+As listagens administrativas deverão permitir paginação, busca e filtros compatíveis com o estado de cada cadastro. Operações de inativação, exclusão lógica e encerramento de vigência deverão solicitar confirmação.
+
+### Cadastro de categorias
+
+As categorias serão utilizadas para organizar os produtos no catálogo e no menu da loja.
+
+Cada categoria deverá possuir:
+
+- Nome.
+- Slug.
+- Descrição, opcionalmente.
+- Ordem de exibição.
+- Estado ativo ou inativo.
+- Indicador e data de exclusão lógica, quando aplicável.
+
+O nome e o slug serão obrigatórios e únicos, sem diferenciação entre letras maiúsculas e minúsculas. O slug deverá ser adequado para utilização em URL.
+
+A ordem de exibição deverá ser um número inteiro maior ou igual a zero. Categorias ativas serão ordenadas primeiro pela ordem de exibição e depois pelo nome.
+
+Somente categorias ativas e não excluídas serão exibidas no catálogo e poderão ser selecionadas em novos produtos.
+
+Uma categoria não poderá ser inativada ou excluída enquanto possuir produtos ativos. Antes da operação, os produtos deverão ser transferidos para outra categoria ativa ou inativados.
+
+A exclusão da categoria será lógica. Uma categoria excluída não poderá ser reativada nem utilizada em novos vínculos, mas permanecerá disponível para preservar relacionamentos históricos.
+
+Funcionários e administradores poderão gerenciar categorias.
+
+### Cadastro de banners
+
+Os banners serão utilizados no carrossel principal da home.
+
+Cada banner deverá possuir:
+
+- Título administrativo, opcionalmente.
+- Imagem para desktop.
+- Imagem para dispositivos móveis, opcionalmente.
+- Texto alternativo.
+- Ordem de exibição.
+- Estado ativo ou inativo.
+- Indicador e data de exclusão lógica, quando aplicável.
+
+A imagem para desktop e o texto alternativo serão obrigatórios. Quando a imagem para dispositivos móveis não for informada, a home utilizará a imagem para desktop.
+
+As imagens deverão aceitar somente os formatos `.jpg`, `.jpeg` e `.png`, com os tipos de mídia `image/jpeg` e `image/png`. Cada arquivo poderá possuir no máximo 2 MB, correspondentes a 2.097.152 bytes. A API deverá validar a extensão, o tipo real e o conteúdo do arquivo.
+
+O texto alternativo será obrigatório, não poderá conter somente espaços e deverá possuir no máximo 200 caracteres.
+
+A ordem de exibição deverá ser um número inteiro maior ou igual a zero e não poderá se repetir entre banners ativos. Uma reordenação deverá ser persistida em uma única operação.
+
+Somente banners ativos e não excluídos serão exibidos na home. A exclusão será lógica e removerá o banner do carrossel sem apagar seu cadastro.
+
+Funcionários e administradores poderão gerenciar banners.
+
+### Cadastro de equipamentos
+
+Os equipamentos representarão as máquinas utilizadas na fabricação dos produtos e no cálculo de energia e depreciação.
+
+Cada equipamento deverá possuir:
+
+- Nome.
+- Apelido.
+- Data da compra.
+- Potência nominal em watts.
+- Valor da compra.
+- Vida útil estimada em horas.
+- Custo de depreciação por hora, calculado pelo sistema.
+- Indicador e data de exclusão lógica, quando aplicável.
+
+Nome e apelido serão obrigatórios. A potência, o valor da compra e a vida útil deverão ser maiores que zero.
+
+O custo de depreciação por hora não será informado manualmente e será calculado por:
+
+`Custo de depreciação por hora = Valor da compra / Vida útil em horas`
+
+A disponibilidade de um equipamento para novas fichas técnicas e precificações será representada por `Excluido = false`.
+
+Antes de excluir um equipamento associado a produtos, o sistema deverá informar quais produtos o utilizam e solicitar confirmação. A exclusão será lógica, não removerá associações existentes nem alterará fichas históricas.
+
+Um equipamento excluído não poderá ser selecionado em novas fichas técnicas, precificações ou orçamentos avulsos. Produtos que ainda o possuam como equipamento padrão deverão apresentar um alerta e não poderão utilizá-lo em uma nova precificação.
+
+Somente administradores poderão gerenciar equipamentos.
+
+### Cadastro de filamentos
+
+Os filamentos representarão as matérias-primas utilizadas na impressão dos produtos.
+
+Cada filamento deverá possuir:
+
+- Cor.
+- Valor da compra.
+- Peso líquido em gramas.
+- Tipo do material.
+- Data da compra.
+- Estado ativo ou inativo.
+
+Os tipos permitidos no MVP serão:
+
+- ABS.
+- PETG.
+- PLA.
+- TPU.
+
+A cor e o tipo serão obrigatórios. O valor da compra e o peso líquido deverão ser maiores que zero.
+
+O custo vigente por grama será calculado por:
+
+`Custo por grama = Valor da compra / Peso líquido em gramas`
+
+Somente filamentos ativos poderão ser selecionados em novas associações de variação e em orçamentos avulsos.
+
+A inativação não removerá associações existentes nem alterará fichas históricas. Antes de inativar um filamento associado a variações, o sistema deverá informar quais variações o utilizam e solicitar confirmação.
+
+Uma variação que utilize filamento inativo não poderá ser ativada nem precificada novamente enquanto sua composição não for regularizada. Seu preço vigente e seu histórico permanecerão inalterados.
+
+Funcionários e administradores poderão gerenciar filamentos.
+
+### Cadastro de marketplaces e faixas de taxas
+
+Os marketplaces representarão canais externos de venda. O MVP não realizará publicação de produtos nem integração automática com esses canais.
+
+Cada marketplace deverá possuir:
+
+- Nome.
+- Link da loja.
+- Zero ou mais faixas de taxas.
+- Indicador e data de exclusão lógica, quando aplicável.
+
+O nome e o link da loja serão obrigatórios. O link deverá ser uma URL absoluta válida com protocolo `https`.
+
+Cada faixa de taxas deverá possuir:
+
+- Valor inicial.
+- Valor final, opcionalmente.
+- Comissão percentual.
+- Taxa fixa.
+- Indicador e data de exclusão lógica, quando aplicável.
+
+O valor inicial e a taxa fixa deverão ser maiores ou iguais a zero. Quando informado, o valor final deverá ser maior que o valor inicial. A comissão deverá ser maior ou igual a 0% e menor que 100%.
+
+O valor inicial da faixa será inclusivo e o valor final será exclusivo. Um valor final nulo representará uma faixa sem limite superior.
+
+As faixas não poderão se sobrepor nem possuir intervalos sem cobertura. A primeira faixa deverá iniciar em zero, cada faixa seguinte deverá iniciar no valor final da faixa anterior e a última faixa deverá possuir valor final nulo.
+
+Para uma margem válida, o sistema deverá encontrar exatamente uma faixa cujo preço final calculado pertença ao intervalo da própria faixa. Se nenhuma ou mais de uma faixa for considerada válida, a precificação deverá ser rejeitada e o cadastro das faixas deverá ser revisado.
+
+Uma faixa que ainda não tenha sido utilizada poderá ser editada. Depois de utilizada em uma ficha de precificação, ela não poderá ser alterada; deverá ser excluída logicamente e substituída por uma nova faixa.
+
+A exclusão de uma faixa não poderá deixar a estrutura ativa do marketplace com sobreposições ou intervalos sem cobertura.
+
+Antes de excluir um marketplace, o sistema deverá informar as variações que possuem vínculo com ele e solicitar confirmação. A exclusão será lógica, tornará seus vínculos indisponíveis e impedirá novas precificações, sem alterar fichas históricas.
+
+Somente administradores poderão gerenciar marketplaces e suas faixas de taxas.
+
+### Cadastro de tarifas de energia
+
+As tarifas de energia representarão o valor do quilowatt-hora utilizado na formação de preço.
+
+Cada tarifa deverá possuir:
+
+- Valor do quilowatt-hora.
+- Data de início da vigência.
+- Data de fim da vigência, opcionalmente.
+
+O valor do quilowatt-hora deverá ser maior que zero. Quando informada, a data final deverá ser maior ou igual à data inicial.
+
+As datas inicial e final serão inclusivas. Não poderão existir períodos de vigência sobrepostos. Uma tarifa sem data final permanecerá vigente por prazo indeterminado e impedirá o cadastro de outra tarifa com vigência sobreposta.
+
+A tarifa vigente será aquela cujo período contenha a data em que a precificação for calculada. Deverá existir no máximo uma tarifa vigente para cada data.
+
+Uma tarifa que ainda não tenha sido utilizada poderá ser editada ou removida. Depois de utilizada em uma ficha de precificação, seus valores e datas não poderão ser alterados nem removidos.
+
+O encerramento de uma tarifa vigente deverá ajustar sua data final. O cadastro da tarifa seguinte não poderá criar sobreposição.
+
+Somente administradores poderão gerenciar tarifas de energia.
+
+### Cadastro de custos de mão de obra
+
+Os custos de mão de obra representarão o valor da hora de trabalho utilizado na formação de preço.
+
+Cada custo de mão de obra deverá possuir:
+
+- Valor da hora.
+- Data de início da vigência.
+- Data de fim da vigência, opcionalmente.
+
+O valor da hora deverá ser maior que zero. Quando informada, a data final deverá ser maior ou igual à data inicial.
+
+As datas inicial e final serão inclusivas. Não poderão existir períodos de vigência sobrepostos. Um custo sem data final permanecerá vigente por prazo indeterminado e impedirá o cadastro de outro custo com vigência sobreposta.
+
+O custo vigente será aquele cujo período contenha a data em que a precificação for calculada. Deverá existir no máximo um custo de mão de obra vigente para cada data.
+
+Um custo que ainda não tenha sido utilizado poderá ser editado ou removido. Depois de utilizado em uma ficha de precificação, seus valores e datas não poderão ser alterados nem removidos.
+
+O encerramento de um custo vigente deverá ajustar sua data final. O cadastro do custo seguinte não poderá criar sobreposição.
+
+Somente administradores poderão gerenciar custos de mão de obra.
 
 ## Regras do Carrinho:
 
@@ -227,6 +462,109 @@ Os dados de Nome, e-mail e telefone serão obtidos através dos dados do cliente
 
 O MVP será preparado para evolução mesmo o cliente não efetuando compras direto no sistema. Com isto, vamos manter o cadastro, login e edição de perfil, mesmo com utilidade inicial limitada.
 
+O cadastro de cliente será representado por uma conta de usuário com o perfil Cliente.
+
+O cliente poderá:
+
+- Criar sua conta.
+- Confirmar seu endereço de e-mail.
+- Autenticar-se.
+- Editar seu nome e telefone.
+- Solicitar a recuperação de senha.
+- Alterar sua senha.
+- Consultar e editar seus próprios dados.
+
+O cliente não poderá alterar seu próprio perfil.
+
+Funcionários poderão listar clientes e solicitar o envio do link de recuperação de senha, mas não poderão modificar seus dados ou sua senha.
+
+Administradores poderão consultar, cadastrar, editar, ativar e inativar clientes. A senha do cliente não poderá ser consultada nem definida manualmente pelo administrador.
+
+### Endereços do usuário
+
+Um usuário poderá cadastrar um ou mais endereços. O cadastro de endereço não será obrigatório durante a criação da conta, mas deverá existir quando o cliente realizar uma operação que envolva entrega.
+
+Cada endereço deverá possuir:
+
+- Identificação do endereço, como Casa ou Trabalho.
+- Nome do destinatário.
+- CEP.
+- Logradouro.
+- Número.
+- Complemento, opcionalmente.
+- Bairro.
+- Cidade.
+- Estado.
+- Ponto de referência, opcionalmente.
+- Indicador de endereço principal.
+
+O CEP deverá possuir oito dígitos e será armazenado sem máscara. O estado deverá ser informado pela sigla da unidade federativa, com dois caracteres.
+
+Cada usuário poderá possuir somente um endereço principal. Ao cadastrar o primeiro endereço de um usuário, ele será definido automaticamente como principal.
+
+Ao definir outro endereço como principal, o endereço anteriormente principal deixará de possuir essa condição. A API deverá realizar essa alteração em uma única transação.
+
+Um endereço utilizado anteriormente em um pedido não deverá ser removido fisicamente. Sua exclusão será lógica e não alterará dados históricos.
+
+Quando o endereço principal for excluído e ainda existirem outros endereços ativos, o usuário deverá selecionar outro endereço principal.
+
+Usuários poderão consultar e gerenciar somente os próprios endereços. Administradores poderão consultar e gerenciar endereços de clientes conforme as permissões administrativas.
+
+Funcionários não poderão alterar os endereços dos clientes.
+
+Quando o módulo de pedidos for implementado, o pedido deverá armazenar uma cópia completa do endereço selecionado. Alterações posteriores no cadastro do endereço não poderão modificar o endereço histórico do pedido.
+
+## Módulo Cadastro de insumo
+
+Os insumos representam materiais comprados e consumidos durante a fabricação ou embalagem de um produto, como argola, fita, plástico-bolha, sacola, caixa, tag e cola.
+
+Cada insumo deverá possuir:
+
+- Nome.
+- Valor da compra.
+- Quantidade comprada.
+- Unidade de medida.
+- Indicador de exclusão lógica.
+- Data da exclusão lógica, quando aplicável.
+
+As unidades de medida permitidas serão:
+
+- Unidade.
+- Grama.
+- Quilograma.
+- Centímetro.
+- Metro.
+- Mililitro.
+- Litro.
+
+O valor da compra e a quantidade comprada deverão ser maiores que zero.
+
+O custo unitário do insumo será calculado automaticamente:
+
+`Custo unitário do insumo = Valor da compra / Quantidade comprada`
+
+O insumo não possuirá estado ativo ou inativo.
+
+A quantidade física disponível do insumo não será controlada no MVP. A quantidade comprada será utilizada somente como base para o cálculo do custo unitário e não representará saldo de estoque.
+
+Um insumo poderá ser excluído logicamente quando não for mais utilizado em novas fichas técnicas.
+
+A exclusão lógica:
+
+- Não removerá o insumo do banco de dados.
+- Não alterará fichas históricas de precificação.
+- Não removerá automaticamente associações existentes com produtos.
+- Impedirá que o insumo seja selecionado em novas associações ou orçamentos avulsos.
+- Não representará ausência de estoque.
+
+Antes de excluir um insumo associado a produtos, o sistema deverá informar quais produtos utilizam esse insumo e solicitar confirmação.
+
+Produtos que já utilizem o insumo continuarão apresentando essa associação na área administrativa.
+
+Um insumo excluído que permaneça associado à ficha técnica de um produto poderá continuar sendo utilizado no cálculo com seu último custo cadastrado.
+
+O sistema deverá alertar que a ficha técnica utiliza um insumo excluído. A exclusão lógica do insumo, isoladamente, não impedirá a precificação ou a reprecificação do produto.
+
 ## Módulo Cadastro de produto
 
 O módulo permitirá que funcionários e administradores criem, consultem, editem, ativem e inativem os produtos comercializados pela loja.
@@ -237,7 +575,7 @@ Um produto poderá ser salvo como inativo mesmo que seu cadastro ainda esteja in
 
 O produto deverá possuir:
 
-- Código interno único.
+- Identificador interno único, gerado pelo banco de dados.
 - Nome.
 - Descrição curta.
 - Descrição completa.
@@ -262,9 +600,9 @@ Após o produto possuir uma precificação confirmada, sua margem somente poder�
 
 A margem deverá ser maior ou igual a 0% e menor que 100%.
 
-O código interno e o slug não poderão ser utilizados por outro produto.
+O identificador interno do produto será seu `IdProduto`, gerado pelo banco de dados. O slug não poderá ser utilizado por outro produto.
 
-O nome do produto não será considerado único. Produtos diferentes poderão possuir nomes semelhantes, desde que tenham códigos internos diferentes.
+O nome do produto não será considerado único. Produtos diferentes poderão possuir nomes semelhantes, pois serão diferenciados por seus identificadores internos.
 
 Não deverão ser criados produtos diferentes apenas para representar opções de cor. As opções de cor deverão ser cadastradas como variações comerciais do mesmo produto.
 
@@ -281,8 +619,11 @@ Cada variação pertencerá a um único produto e deverá possuir:
 - Percentual de perda para cada filamento.
 - Uma ou mais imagens.
 - Preço de custo vigente.
-- Preço de venda atual no catálogo.
-- Preços de venda atuais por marketplace, quando aplicável.
+- Preço de venda atual no catálogo, obtido da ficha confirmada mais recente sem marketplace.
+- Zero ou mais vínculos com marketplaces.
+- Preço de venda atual em cada marketplace com vínculo ativo, obtido da ficha confirmada mais recente para o respectivo marketplace.
+
+Ao ser criada, a variação iniciará inativa e poderá permanecer como rascunho enquanto seu cadastro estiver incompleto.
 
 O nome comercial da variação deverá ser único dentro do mesmo produto.
 
@@ -302,6 +643,34 @@ Para cada filamento associado:
 
 A ativação ou inativação de uma variação não alterará o estado das demais variações do produto.
 
+### Marketplaces da variação
+
+Uma variação poderá ser vinculada a zero ou mais marketplaces.
+
+O vínculo indicará que a variação é comercializada naquele marketplace e não armazenará seu preço de venda.
+
+Cada combinação de variação e marketplace deverá ser única.
+
+Ao vincular uma variação a um marketplace, o vínculo será criado como ativo.
+
+Um vínculo ativo permitirá:
+
+- Realizar precificações da variação para o marketplace.
+- Consultar seu preço de venda atual no marketplace.
+- Incluir o marketplace na reprecificação em lote.
+
+Um vínculo inativo:
+
+- Não permitirá novas precificações para aquela combinação.
+- Não será considerado na reprecificação em lote.
+- Não removerá nem alterará fichas históricas.
+- Não removerá o preço anteriormente calculado do histórico.
+- Não afetará outras variações vinculadas ao mesmo marketplace.
+
+A exclusão lógica do marketplace tornará indisponíveis todos os seus vínculos, sem alterar o histórico.
+
+A reativação de um vínculo não criará uma nova ficha de precificação. O preço anterior continuará disponível no histórico, mas uma nova precificação deverá ser confirmada para definir um novo preço atual.
+
 ### Imagens da variação
 
 Cada imagem pertencerá a uma única variação.
@@ -310,9 +679,57 @@ A primeira imagem adicionada será definida inicialmente como imagem de destaque
 
 Cada variação poderá possuir somente uma imagem de destaque.
 
+Ao selecionar uma nova imagem como destaque, o frontend deverá:
+
+- Remover a condição de destaque da imagem anteriormente selecionada.
+- Marcar a nova imagem como destaque.
+- Atualizar o estado visual da interface.
+- Enviar à API o conjunto atualizado das imagens da variação.
+
+A API deverá validar o DTO recebido antes da persistência.
+
+Quando a variação possuir imagens:
+
+- Exatamente uma imagem deverá estar marcada como destaque.
+- Não poderão existir duas ou mais imagens marcadas como destaque.
+- Todas as imagens informadas deverão pertencer à variação atual.
+- A ordem de exibição não poderá estar duplicada.
+- A variação não poderá ultrapassar o limite de cinco imagens.
+
+Caso o DTO seja inválido, a API deverá rejeitar toda a operação e não persistir alterações parciais.
+
+Quando o DTO for válido, a API deverá persistir as alterações das imagens em uma única operação.
+
 Caso a imagem de destaque seja removida, a primeira imagem restante será definida como a nova imagem de destaque.
 
-Os formatos, tamanhos máximos e quantidade máxima de imagens deverão ser definidos antes da implementação.
+Cada variação poderá possuir no máximo cinco imagens.
+
+O sistema deverá impedir o envio de uma nova imagem quando a variação já possuir cinco imagens.
+
+Serão aceitos somente arquivos com as extensões:
+
+- `.jpg`
+- `.jpeg`
+- `.png`
+
+O sistema deverá validar a extensão, o tipo real do arquivo e seu conteúdo. Renomear um arquivo de outro formato para uma extensão permitida não deverá torná-lo válido.
+
+Os tipos de mídia aceitos serão:
+
+- `image/jpeg`
+- `image/png`
+
+Cada arquivo poderá possuir no máximo 2 MB, correspondentes a 2.097.152 bytes.
+
+A dimensão recomendada será de 2048 × 2048 pixels para permitir a ampliação da imagem no catálogo.
+
+A dimensão recomendada não será uma restrição obrigatória. Imagens com outras dimensões poderão ser aceitas desde que atendam aos formatos e ao tamanho máximo definidos.
+
+O texto alternativo será obrigatório e não poderá conter somente espaços.
+
+O texto alternativo deverá possuir no máximo 200 caracteres.
+
+O sistema deverá preservar a proporção original da imagem durante sua exibição e ampliação.
 
 ### Ficha técnica e composição do produto
 
@@ -386,7 +803,7 @@ Um produto inativo poderá ser salvo com o cadastro incompleto e não será exib
 
 Para ativar um produto, será obrigatório possuir:
 
-- Código interno único.
+- Identificador interno gerado pelo banco de dados.
 - Nome.
 - Descrição curta.
 - Descrição completa.
@@ -440,18 +857,26 @@ Não poderá existir um produto ativo sem pelo menos uma variação ativa.
 
 O módulo de formação de preço faz parte do MVP e será utilizado por funcionários e administradores. Seu objetivo será calcular o custo de produção e sugerir um preço de venda tanto para uma variação específica de um produto cadastrado quanto para um orçamento avulso, com base nos dados de produção, nos custos vigentes e no canal de venda.
 
-Os preços vigentes pertencerão à variação e não à ficha histórica de precificação.
+O preço de custo vigente será armazenado na variação.
+
+Os preços de venda atuais não serão armazenados diretamente na variação. Eles serão obtidos das fichas históricas de precificação confirmadas.
+
+Para o catálogo, será utilizado o preço da ficha confirmada mais recente da variação que não possua marketplace.
+
+Para um marketplace com vínculo ativo, será utilizado o preço da ficha confirmada mais recente da variação associada àquele marketplace.
+
+As fichas históricas serão imutáveis. Uma nova confirmação criará outra ficha e não atualizará fichas existentes.
 
 Cada variação poderá possuir:
 
 - Um preço de custo vigente.
-- Um preço de venda vigente para o catálogo.
-- Um preço de venda vigente para cada marketplace no qual for comercializada.
+- Um preço de venda atual para o catálogo, obtido de sua ficha confirmada mais recente sem marketplace.
+- Um preço de venda atual para cada marketplace com vínculo ativo, obtido da ficha confirmada mais recente do respectivo marketplace.
 - Uma ou mais fichas históricas de precificação.
 
 Cada precificação confirmada gerará uma ou mais fichas históricas imutáveis, conforme as regras da seção [Simulação e confirmação](#simulação-e-confirmação).
 
-Quando a precificação for confirmada, o sistema atualizará os preços vigentes aplicáveis conforme as regras da seção [Simulação e confirmação](#simulação-e-confirmação).
+Quando a precificação for confirmada, a nova ficha passará a definir o preço de venda atual do canal aplicável, conforme as regras da seção [Simulação e confirmação](#simulação-e-confirmação).
 
 Na precificação de um produto cadastrado, os filamentos, as quantidades consumidas e os percentuais de perda serão obtidos automaticamente da variação selecionada.
 
@@ -538,7 +963,7 @@ As seguintes validações serão aplicadas:
 - A quantidade de cada filamento deverá ser maior que zero.
 - O percentual de perda deverá estar entre 0% e 100%.
 - A soma da margem com a comissão do marketplace deverá ser menor que 100%.
-- O equipamento, os filamentos e os insumos selecionados deverão estar ativos.
+- O equipamento selecionado não poderá estar excluído, os filamentos selecionados deverão estar ativos e os insumos selecionados não poderão estar excluídos logicamente.
 - Deverá existir uma tarifa de energia vigente.
 - Deverá existir um custo de mão de obra vigente.
 - Quando um marketplace for selecionado, deverá existir uma faixa de taxas aplicável.
@@ -569,22 +994,22 @@ Antes de realizar uma formação de preço:
 
 #### Para orçamento avulso
 
-- O equipamento deverá estar cadastrado e ativo.
+- O equipamento deverá estar cadastrado e não poderá estar excluído.
 - Pelo menos um filamento deverá estar cadastrado e ativo.
 - Deverá existir uma tarifa de energia vigente.
 - Deverá existir um custo de mão de obra vigente.
-- Quando utilizado, o marketplace deverá estar ativo e possuir faixas de taxas cadastradas.
+- Quando utilizado, o marketplace não poderá estar excluído e deverá possuir faixas de taxas cadastradas.
 
 #### Para precificação de produto cadastrado
 
 - O produto e sua variação deverão estar cadastrados.
-- O equipamento deverá estar cadastrado e ativo.
+- O equipamento deverá estar cadastrado e não poderá estar excluído.
 - Os filamentos utilizados deverão estar vinculados à variação.
 - Os insumos utilizados deverão estar vinculados ao produto.
 - As variações dos produtos componentes deverão possuir preço de custo vigente.
 - Deverá existir uma tarifa de energia vigente.
 - Deverá existir um custo de mão de obra vigente.
-- Quando utilizado, o marketplace deverá estar ativo e possuir faixas de taxas cadastradas.
+- Quando utilizado, o marketplace não poderá estar excluído, deverá possuir faixas de taxas cadastradas e deverá possuir vínculo ativo com a variação selecionada.
 
 ### Informações selecionadas na formação de preço
 
@@ -602,7 +1027,11 @@ O funcionário ou administrador deverá:
 - Selecionar a variação comercial.
 - Selecionar o equipamento.
 - Informar a quantidade produzida no lote.
-- Selecionar opcionalmente o marketplace.
+- Selecionar opcionalmente um marketplace que possua vínculo ativo com a variação.
+
+Na precificação de produto cadastrado, somente marketplaces não excluídos e com vínculo ativo com a variação serão apresentados para seleção.
+
+A criação ou reativação do vínculo deverá ser realizada no cadastro da variação e não durante a precificação.
 
 O sistema carregará automaticamente a margem cadastrada no produto.
 
@@ -768,7 +1197,36 @@ A precificação deverá apresentar:
 - Lucro unitário.
 - Preço de venda sugerido.
 
-Os custos intermediários deverão preservar precisão decimal. O preço final será arredondado para duas casas decimais.
+### Precisão e arredondamento
+
+Todos os cálculos deverão utilizar o tipo decimal e preservar a precisão disponível durante a execução.
+
+Não deverão ser utilizados tipos de ponto flutuante binário, como `float` ou `double`, para valores monetários, percentuais, quantidades ou custos.
+
+Nenhum custo intermediário deverá ser arredondado antes do cálculo do preço de venda final.
+
+Após a conclusão do cálculo:
+
+- Os custos intermediários serão persistidos com quatro casas decimais.
+- O preço de venda final será persistido com duas casas decimais.
+- O preço final será calculado a partir dos valores ainda não arredondados.
+- Os valores intermediários já reduzidos para quatro casas não serão reutilizados no cálculo da mesma operação.
+
+O arredondamento deverá utilizar o valor mais distante de zero quando o primeiro algarismo descartado estiver exatamente no ponto médio.
+
+Em .NET, deverá ser utilizado:
+
+`decimal.Round(valor, quantidadeDeCasas, MidpointRounding.AwayFromZero)`
+
+Os valores intermediários poderão ser exibidos com duas casas decimais na interface, mas essa formatação visual não deverá alterar os valores utilizados nos cálculos.
+
+Para cada faixa de marketplace candidata, o sistema deverá:
+
+1. Calcular o preço de venda sem arredondamentos intermediários.
+2. Arredondar o preço final para duas casas decimais.
+3. Verificar se o preço arredondado pertence aos limites da faixa candidata.
+
+A faixa será considerada válida somente quando o preço final arredondado estiver entre seus limites.
 
 Quando nenhum marketplace for selecionado, o preço de venda sugerido corresponderá ao preço sugerido para o catálogo.
 
@@ -804,12 +1262,12 @@ Toda precificação confirmada sem alteração da margem:
 
 Quando a precificação confirmada não possuir marketplace:
 
-- O preço de venda calculado será definido como o preço de venda atual da variação no catálogo.
+- A nova ficha será a referência do preço de venda atual da variação no catálogo.
 
 Quando a precificação confirmada possuir marketplace:
 
 - O preço de venda atual da variação no catálogo não será alterado.
-- O preço de venda calculado será definido como o preço atual da variação no marketplace selecionado.
+- A nova ficha será a referência do preço atual da variação no marketplace selecionado.
 - Os preços registrados para os demais marketplaces não serão alterados.
 
 #### Confirmação com alteração da margem do produto
@@ -817,18 +1275,26 @@ Quando a precificação confirmada possuir marketplace:
 Quando o administrador confirmar uma precificação utilizando uma margem diferente da margem atual do produto:
 
 - A nova margem substituirá permanentemente a margem cadastrada no produto.
-- Todas as variações do produto serão recalculadas imediatamente com a nova margem.
-- O preço de custo vigente de cada variação será atualizado.
-- O preço de venda vigente no catálogo de cada variação será atualizado.
-- Os preços vigentes de cada variação nos marketplaces em que ela for comercializada serão atualizados.
-- Será criada uma ficha histórica de precificação para cada variação e canal recalculado.
+- Todas as variações elegíveis do produto serão recalculadas imediatamente com a nova margem.
+- O preço de custo vigente de cada variação recalculada será atualizado.
+- Será criada uma nova ficha sem marketplace para definir o novo preço atual do catálogo de cada variação recalculada.
+- Será criada uma nova ficha para cada marketplace com vínculo ativo, definindo seu novo preço atual.
+- Será criada uma ficha histórica de precificação para cada variação e canal efetivamente recalculado.
 - Cada ficha histórica armazenará a margem utilizada e todos os dados considerados no respectivo cálculo.
 
-A nova margem será aplicada às variações ativas e inativas do produto.
+Serão elegíveis para a reprecificação somente as variações ativas cujo produto possua um equipamento padrão cadastrado.
 
-A alteração da margem e a reprecificação das variações deverão ocorrer em uma única operação transacional.
+Variações inativas ou mantidas como rascunho não serão recalculadas e não impedirão a confirmação da operação.
 
-Caso alguma variação não possa ser recalculada, o sistema deverá:
+Quando o produto não possuir um equipamento padrão cadastrado, suas variações não serão recalculadas e não impedirão a confirmação da operação.
+
+Os preços vigentes das variações não recalculadas permanecerão inalterados.
+
+Antes de iniciar a atualização, o sistema deverá classificar as variações entre elegíveis e não elegíveis.
+
+A alteração da margem e a atualização das variações elegíveis deverão ocorrer em uma única operação transacional.
+
+Uma falha durante o cálculo de qualquer variação elegível deverá:
 
 - Cancelar toda a operação.
 - Manter a margem anterior do produto.
@@ -836,14 +1302,26 @@ Caso alguma variação não possa ser recalculada, o sistema deverá:
 - Não criar fichas históricas parciais.
 - Informar ao usuário quais variações impediram a confirmação.
 
-Uma variação impedirá a reprecificação quando:
+Uma variação elegível impedirá a reprecificação quando:
 
 - Não possuir uma composição válida de filamentos.
-- Utilizar filamento, insumo ou equipamento indisponível para o cálculo.
+- Utilizar filamento inativo.
+- Utilizar equipamento excluído ou indisponível para o cálculo.
+- Utilizar insumo cujo cadastro ou dados de custo não estejam disponíveis.
 - Possuir produto componente sem preço de custo vigente.
 - Não existir tarifa de energia vigente.
 - Não existir custo de mão de obra vigente.
 - Não for possível determinar uma faixa válida para algum marketplace aplicável.
+
+Um insumo excluído logicamente, mas ainda associado ao produto e com dados de custo preservados, não impedirá a reprecificação.
+
+Variações não elegíveis serão ignoradas antes do início da operação e não serão consideradas falhas.
+
+Ao final da operação, o sistema deverá informar:
+
+- As variações recalculadas com sucesso.
+- As variações ignoradas por estarem inativas ou em rascunho.
+- As variações ignoradas porque o produto não possui equipamento padrão cadastrado.
 
 #### Parâmetros da reprecificação em lote
 
@@ -851,16 +1329,20 @@ Para recalcular todas as variações após uma alteração de margem, o sistema 
 
 - A ficha técnica atual do produto.
 - A composição de filamentos de cada variação.
-- O equipamento padrão cadastrado na ficha técnica.
+- O equipamento padrão associado ao produto.
 - Os custos vigentes dos filamentos e insumos.
 - Os preços de custo vigentes dos produtos componentes.
 - A tarifa de energia vigente.
 - O custo de mão de obra vigente.
 - A nova margem do produto.
-- As faixas e taxas vigentes de cada marketplace.
+- As faixas e taxas vigentes de cada marketplace com vínculo ativo com a variação.
 - A quantidade produzida informada na precificação que iniciou a alteração da margem.
 
-O equipamento selecionado somente para a variação originalmente precificada não será aplicado automaticamente às demais variações. Para a reprecificação em lote, será utilizado o equipamento padrão da ficha técnica do produto.
+Na reprecificação em lote, todas as variações elegíveis utilizarão o equipamento padrão associado ao produto.
+
+O equipamento selecionado somente para a simulação original não será aplicado às demais variações e não substituirá automaticamente o equipamento padrão do produto.
+
+Marketplaces com vínculo inativo não serão considerados na reprecificação em lote e não impedirão a operação.
 
 ### Histórico
 
@@ -883,8 +1365,10 @@ O preço de venda calculado será armazenado na ficha de precificação, pois po
 Na consulta administrativa do produto, cada variação deverá apresentar separadamente:
 
 - O preço de custo vigente.
-- O preço de venda atual no catálogo.
-- O preço de venda atual em cada marketplace no qual a variação será comercializada.
+- O preço da ficha confirmada mais recente sem marketplace, utilizado como preço atual do catálogo.
+- Os marketplaces vinculados e o estado de cada vínculo.
+- O preço da ficha confirmada mais recente de cada marketplace com vínculo ativo.
+- O histórico de preços dos marketplaces com vínculo inativo.
 
 ## Módulo Newsletter e LGPD
 

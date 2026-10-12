@@ -1,3 +1,61 @@
+Table Perfil {
+  IdPerfil uuid [pk, not null]
+  Nome varchar(30) [not null]
+  Descricao varchar(200) [null]
+
+  indexes {
+    Nome [unique]
+  }
+
+  Note: 'Perfis fixos da aplicacao: Cliente, Funcionario e Administrador'
+}
+
+Table Usuario {
+  IdUsuario uuid [pk, not null]
+  IdPerfil uuid [not null]
+  Nome varchar(150) [not null]
+  Email varchar(254) [not null]
+  EmailNormalizado varchar(254) [not null]
+  SenhaHash varchar(500) [not null]
+  Telefone varchar(20) [null]
+  EmailConfirmado boolean [not null, default: false]
+  Ativo boolean [not null, default: true]
+  TentativasAcessoFalhas int [not null, default: 0]
+  BloqueadoAteUtc timestamp [null]
+  CriadoEmUtc timestamp [not null]
+  AtualizadoEmUtc timestamp [null]
+  UltimoAcessoEmUtc timestamp [null]
+
+  indexes {
+    EmailNormalizado [unique]
+    IdPerfil
+  }
+}
+
+Table UsuarioEndereco {
+  IdUsuarioEndereco uuid [pk, not null]
+  IdUsuario uuid [not null]
+  Identificacao varchar(50) [not null, note: 'Ex.: Casa, Trabalho']
+  NomeDestinatario varchar(150) [not null]
+  Cep varchar(8) [not null, note: 'Somente numeros']
+  Logradouro varchar(150) [not null]
+  Numero varchar(20) [not null]
+  Complemento varchar(100) [null]
+  Bairro varchar(100) [not null]
+  Cidade varchar(100) [not null]
+  Estado varchar(2) [not null, note: 'Sigla da unidade federativa']
+  PontoReferencia varchar(200) [null]
+  Principal boolean [not null, default: false]
+  Excluido boolean [not null, default: false]
+  CriadoEmUtc timestamp [not null]
+  AtualizadoEmUtc timestamp [null]
+  DataExclusaoUtc timestamp [null]
+
+  indexes {
+    IdUsuario
+  }
+}
+
 Table Equipamento {
   IdEquipamento uuid [pk, not null]
   Nome varchar(100) [not null]
@@ -6,17 +64,45 @@ Table Equipamento {
   PotenciaWatts int [not null, note: 'Potência nominal em watts']
   ValorCompra decimal(10,2) [not null]
   VidaUtilHoras int [not null, note: 'Vida útil estimada em horas']
-  CustoDepreciacaoHora decimal(10,2) [not null, note: 'Coluna calculada: ValorCompra / VidaUtilHoras']
+  CustoDepreciacaoHora decimal(14,4) [not null, note: 'Coluna calculada: ValorCompra / VidaUtilHoras']
   Excluido boolean [not null, default: false]
   DataExclusao timestamp [null]
 }
 
+Table Categoria {
+  IdCategoria uuid [pk, not null]
+  Nome varchar(100) [not null]
+  Slug varchar(120) [not null]
+  Descricao varchar(300) [null]
+  OrdemExibicao int [not null, default: 0]
+  Ativa boolean [not null, default: true]
+  Excluida boolean [not null, default: false]
+  DataExclusao timestamp [null]
+
+  indexes {
+    Nome [unique]
+    Slug [unique]
+  }
+}
+
 Table Produto {
   IdProduto uuid [pk, not null]
+  IdCategoria uuid [not null]
+  IdEquipamento uuid [null]
   Nome varchar(100) [not null]
+  DescricaoCurta varchar(300) [not null]
+  DescricaoCompleta text [not null]
+  Slug varchar(120) [not null]
+  PrazoProducaoDias int [not null]
+  MargemLucroPercentual decimal(5,2) [not null, default: 60]
   TempoImpressaoMinutos int [not null]
   TempoMaoDeObraMinutos int [not null]
-  IdEquipamento uuid [null]
+  Ativo boolean [not null, default: false]
+  Destaque boolean [not null, default: false]
+
+  indexes {
+    Slug [unique]
+  }
 }
 
 Table Filamento {
@@ -26,15 +112,15 @@ Table Filamento {
   PesoLiquidoGramas decimal(10,3) [not null]
   Tipo varchar(10) [not null, note: 'ABS, PETG, PLA ou TPU']
   DataCompra date [not null]
+  Ativo boolean [not null, default: true]
 }
 
 Table ProdutoVariacao {
   IdProdutoVariacao uuid [pk, not null]
   IdProduto uuid [not null]
   Nome varchar(50) [not null]
-  CodigoInterno varchar(50) [null]
-  Ativa boolean [not null, default: true]
-  PrecoCusto decimal(10,2) [not null]
+  Ativa boolean [not null, default: false]
+  PrecoCusto decimal(10,2) [null]
 
   indexes {
     (IdProduto, Nome) [unique]
@@ -50,6 +136,32 @@ Table ProdutoVariacaoFilamento {
 
   indexes {
     (IdProdutoVariacao, IdFilamento) [unique]
+  }
+}
+
+Table ProdutoVariacaoMarketplace {
+  IdProdutoVariacaoMarketplace uuid [pk, not null]
+  IdProdutoVariacao uuid [not null]
+  IdMarketplace uuid [not null]
+  Ativa boolean [not null, default: true]
+
+  indexes {
+    (IdProdutoVariacao, IdMarketplace) [unique]
+  }
+}
+
+Table ProdutoVariacaoImagem {
+  IdProdutoVariacaoImagem uuid [pk, not null]
+  IdProdutoVariacao uuid [not null]
+  UrlImagem varchar(500) [not null]
+  NomeArquivo varchar(255) [null]
+  TextoAlternativo varchar(200) [not null]
+  OrdemExibicao int [not null]
+  Destaque boolean [not null, default: false]
+  CriadaEmUtc timestamp [not null]
+
+  indexes {
+    (IdProdutoVariacao, OrdemExibicao) [unique]
   }
 }
 
@@ -94,6 +206,18 @@ Table Marketplace {
   DataExclusao timestamp [null]
 }
 
+Table Banner {
+  IdBanner uuid [pk, not null]
+  Titulo varchar(150) [null]
+  UrlImagemDesktop varchar(500) [not null]
+  UrlImagemMobile varchar(500) [null]
+  TextoAlternativo varchar(200) [not null]
+  OrdemExibicao int [not null, default: 0]
+  Ativo boolean [not null, default: true]
+  Excluido boolean [not null, default: false]
+  DataExclusao timestamp [null]
+}
+
 Table TaxasMarketplace {
   IdTaxa uuid [pk, not null]
   IdMarketplace uuid [not null]
@@ -101,6 +225,8 @@ Table TaxasMarketplace {
   ValorFinal decimal(10,2) [null, note: 'Nulo representa uma faixa sem limite superior']
   ComissaoPercentual decimal(5,2) [not null, note: 'Percentual entre 0 e 100']
   TaxaFixa decimal(10,2) [not null]
+  Excluida boolean [not null, default: false]
+  DataExclusao timestamp [null]
 }
 
 Table TarifaEnergia {
@@ -154,6 +280,7 @@ Table FichaPrecificacao {
   indexes {
     (IdProduto, CalculadaEmUtc)
     (IdProdutoVariacao, CalculadaEmUtc)
+    (IdProdutoVariacao, IdMarketplace, CalculadaEmUtc)
   }
 }
 
@@ -167,11 +294,18 @@ Table ItemFichaPrecificacao {
   ValorTotal decimal(14,4) [not null]
 }
 
+Ref: Usuario.IdPerfil > Perfil.IdPerfil [delete: restrict]
+Ref: UsuarioEndereco.IdUsuario > Usuario.IdUsuario [delete: restrict]
+
 Ref: Produto.IdEquipamento > Equipamento.IdEquipamento [delete: restrict]
+Ref: Produto.IdCategoria > Categoria.IdCategoria [delete: restrict]
 
 Ref: ProdutoVariacao.IdProduto > Produto.IdProduto [delete: cascade]
 Ref: ProdutoVariacaoFilamento.IdProdutoVariacao > ProdutoVariacao.IdProdutoVariacao [delete: cascade]
 Ref: ProdutoVariacaoFilamento.IdFilamento > Filamento.IdFilamento [delete: restrict]
+Ref: ProdutoVariacaoImagem.IdProdutoVariacao > ProdutoVariacao.IdProdutoVariacao [delete: cascade]
+Ref: ProdutoVariacaoMarketplace.IdProdutoVariacao > ProdutoVariacao.IdProdutoVariacao [delete: cascade]
+Ref: ProdutoVariacaoMarketplace.IdMarketplace > Marketplace.IdMarketplace [delete: restrict]
 
 Ref: ProdutoInsumo.IdProduto > Produto.IdProduto [delete: cascade]
 Ref: ProdutoInsumo.IdInsumo > Insumo.IdInsumo [delete: restrict]
@@ -180,7 +314,7 @@ Ref: Produto_Composicao.IdProdutoPai > Produto.IdProduto [delete: cascade]
 Ref: Produto_Composicao.IdProdutoFilho > Produto.IdProduto [delete: restrict]
 Ref: Produto_Composicao.IdProdutoVariacaoFilho > ProdutoVariacao.IdProdutoVariacao [delete: restrict]
 
-Ref: TaxasMarketplace.IdMarketplace > Marketplace.IdMarketplace [delete: cascade]
+Ref: TaxasMarketplace.IdMarketplace > Marketplace.IdMarketplace [delete: restrict]
 
 Ref: FichaPrecificacao.IdProduto > Produto.IdProduto [delete: restrict]
 Ref: FichaPrecificacao.IdProdutoVariacao > ProdutoVariacao.IdProdutoVariacao [delete: restrict]
